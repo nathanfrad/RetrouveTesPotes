@@ -1,0 +1,166 @@
+import React from 'react';
+import {
+  StyleSheet,
+  View,
+  Text,
+  Dimensions,
+  TouchableOpacity,
+  Alert,
+} from 'react-native';
+
+import MapView, {Marker, ProviderPropType} from 'react-native-maps';
+import flagPinkImg from '../assets/flag-pink.png';
+
+const {width, height} = Dimensions.get('window');
+
+const ASPECT_RATIO = width / height;
+const LATITUDE = 37.78825;
+const LONGITUDE = -122.4324;
+const LATITUDE_DELTA = 0.0922;
+const LONGITUDE_DELTA = LATITUDE_DELTA * ASPECT_RATIO;
+let id = 0;
+
+class CustomMarkers extends React.Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      region: {
+        latitude: LATITUDE,
+        longitude: LONGITUDE,
+        latitudeDelta: LATITUDE_DELTA,
+        longitudeDelta: LONGITUDE_DELTA,
+      },
+      markers: [
+        {
+          title: 'hello1',
+          coordinate: {
+            latitude: 37.78825,
+            longitude: -122.4324,
+          },
+        },
+        {
+          title: 'hello2',
+          coordinate: {
+            latitude: 37.75,
+            longitude: -122.43,
+          },
+        },
+        {
+          title: 'hello3',
+          coordinate: {
+            latitude: 37.76,
+            longitude: -122.46,
+          },
+        },
+      ],
+    };
+  }
+
+  componentDidMount(): void {
+    let totalLatitude = 0;
+    let totalLongitude = 0;
+    let averageLatitude = 0;
+    let averageLongitude = 0;
+    this.state.markers.map((marker, index) => {
+      totalLatitude = totalLatitude + marker.coordinate.latitude;
+      totalLongitude = totalLongitude + marker.coordinate.longitude;
+      averageLatitude = totalLatitude / (index + 1);
+      averageLongitude = totalLongitude / (index + 1);
+      this.setState({
+        averageMarker: {
+          title: 'Average',
+          coordinate: {
+            latitude: averageLatitude,
+            longitude: averageLongitude,
+          },
+        },
+      });
+    });
+    Alert.alert('lat :' + averageLatitude + 'long :' + averageLongitude,
+    );
+  }
+
+  render() {
+    return (
+      <View style={styles.container}>
+        <MapView
+          provider={this.props.provider}
+          style={styles.map}
+          initialRegion={this.state.region}
+        >
+          {this.state.markers.map((marker, index) => (
+            <Marker
+              title={marker.title}
+              image={flagPinkImg}
+              key={index}
+              coordinate={marker.coordinate}
+            />
+          ))}
+
+          {this.state.averageMarker &&
+          <View>
+            <MapView.Circle
+              center={this.state.averageMarker.coordinate}
+              radius={1000}
+              strokeColor='#4F6D7A'
+              strokeWidth={2}
+            />
+            <Marker
+              title={this.state.averageMarker.title}
+              key={'8'}
+              coordinate={this.state.averageMarker.coordinate}/>
+          </View>
+          }
+        </MapView>
+
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity
+            onPress={() => this.setState({markers: []})}
+            style={styles.bubble}
+          >
+            <Text>Tap to create a marker of random color</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    );
+  }
+}
+
+CustomMarkers.propTypes = {
+  provider: ProviderPropType,
+};
+
+const styles = StyleSheet.create({
+  container: {
+    ...StyleSheet.absoluteFillObject,
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+  },
+  map: {
+    ...StyleSheet.absoluteFillObject,
+  },
+  bubble: {
+    backgroundColor: 'rgba(255,255,255,0.7)',
+    paddingHorizontal: 18,
+    paddingVertical: 12,
+    borderRadius: 20,
+  },
+  latlng: {
+    width: 200,
+    alignItems: 'stretch',
+  },
+  button: {
+    width: 80,
+    paddingHorizontal: 12,
+    alignItems: 'center',
+    marginHorizontal: 10,
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    marginVertical: 20,
+    backgroundColor: 'transparent',
+  },
+});
+
+export default CustomMarkers;
