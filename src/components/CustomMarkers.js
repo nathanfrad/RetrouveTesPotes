@@ -1,4 +1,7 @@
 import React from 'react';
+
+import Geolocation from '@react-native-community/geolocation';
+
 import {
   StyleSheet,
   View,
@@ -8,7 +11,7 @@ import {
   Alert,
 } from 'react-native';
 
-import MapView, {Marker, ProviderPropType} from 'react-native-maps';
+import MapView, {Marker, PROVIDER_GOOGLE} from 'react-native-maps';
 import flagPinkImg from '../assets/flag-pink.png';
 
 const {width, height} = Dimensions.get('window');
@@ -30,6 +33,11 @@ class CustomMarkers extends React.Component {
         longitude: LONGITUDE,
         latitudeDelta: LATITUDE_DELTA,
         longitudeDelta: LONGITUDE_DELTA,
+      },
+      myGeolocation: {
+        latitude: LATITUDE,
+        longitude: LONGITUDE,
+        error: null,
       },
       markers: [
         {
@@ -57,29 +65,55 @@ class CustomMarkers extends React.Component {
     };
   }
 
-  componentDidMount(): void {
-    let totalLatitude = 0;
-    let totalLongitude = 0;
-    let averageLatitude = 0;
-    let averageLongitude = 0;
-    this.state.markers.map((marker, index) => {
-      totalLatitude = totalLatitude + marker.coordinate.latitude;
-      totalLongitude = totalLongitude + marker.coordinate.longitude;
-      averageLatitude = totalLatitude / (index + 1);
-      averageLongitude = totalLongitude / (index + 1);
-      this.setState({
-        averageMarker: {
-          title: 'Average',
-          coordinate: {
-            latitude: averageLatitude,
-            longitude: averageLongitude,
-          },
-        },
-      });
-    });
-    Alert.alert('lat :' + averageLatitude + 'long :' + averageLongitude,
+
+  getMapRegion = () => ({
+    latitude: this.state.latitude,
+    longitude: this.state.longitude,
+    latitudeDelta: LATITUDE_DELTA,
+    longitudeDelta: LONGITUDE_DELTA,
+  });
+
+  componentDidMount() {
+
+    Geolocation.watchPosition(
+      position => {
+        const { latitude, longitude } = position.coords;
+        this.setState({ latitude,longitude });
+      },
+      error => console.log(error),
+      {
+        enableHighAccuracy: true,
+        timeout: 20000,
+        maximumAge: 1000,
+        distanceFilter: 10,
+      },
     );
   }
+
+
+  // componentDidMount(): void {
+  //   let totalLatitude = 0;
+  //   let totalLongitude = 0;
+  //   let averageLatitude = 0;
+  //   let averageLongitude = 0;
+  //   this.state.markers.map((marker, index) => {
+  //     totalLatitude = totalLatitude + marker.coordinate.latitude;
+  //     totalLongitude = totalLongitude + marker.coordinate.longitude;
+  //     averageLatitude = totalLatitude / (index + 1);
+  //     averageLongitude = totalLongitude / (index + 1);
+  //     this.setState({
+  //       averageMarker: {
+  //         title: 'Average',
+  //         coordinate: {
+  //           latitude: averageLatitude,
+  //           longitude: averageLongitude,
+  //         },
+  //       },
+  //     });
+  //   });
+  //   Alert.alert('lat :' + averageLatitude + 'long :' + averageLongitude,
+  //   );
+  // }
 
   render() {
     return (
@@ -87,7 +121,8 @@ class CustomMarkers extends React.Component {
         <MapView
           provider={this.props.provider}
           style={styles.map}
-          initialRegion={this.state.region}
+          region={this.getMapRegion()}
+          // initialRegion={this.state.region}
         >
           {this.state.markers.map((marker, index) => (
             <Marker
@@ -112,6 +147,9 @@ class CustomMarkers extends React.Component {
               coordinate={this.state.averageMarker.coordinate}/>
           </View>
           }
+
+          <Marker coordinate={this.getMapRegion()}/>
+
         </MapView>
 
         <View style={styles.buttonContainer}>
@@ -128,7 +166,7 @@ class CustomMarkers extends React.Component {
 }
 
 CustomMarkers.propTypes = {
-  provider: ProviderPropType,
+  provider: PROVIDER_GOOGLE,
 };
 
 const styles = StyleSheet.create({
