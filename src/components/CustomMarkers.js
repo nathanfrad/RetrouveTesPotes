@@ -77,8 +77,8 @@ class CustomMarkers extends React.Component {
 
     Geolocation.watchPosition(
       position => {
-        const { latitude, longitude } = position.coords;
-        this.setState({ latitude,longitude });
+        const {latitude, longitude} = position.coords;
+        this.setState({latitude, longitude});
       },
       error => console.log(error),
       {
