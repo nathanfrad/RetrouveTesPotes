@@ -22,6 +22,7 @@ const LONGITUDE = -122.4324;
 const LATITUDE_DELTA = 0.006922;
 const LONGITUDE_DELTA = LATITUDE_DELTA * ASPECT_RATIO;
 const USER = 'Nathan';
+const RadiusCircle = 100;
 
 
 class CustomMarkers extends React.Component {
@@ -74,7 +75,14 @@ class CustomMarkers extends React.Component {
     longitudeDelta: LONGITUDE_DELTA,
   });
 
-  distance = (lat1, lon1, lat2, lon2, unit) => {
+
+  getDistance = (point1, point2, unit) => {
+
+    let lat1 = point1.coordinate.latitude;
+    let lon1 = point1.coordinate.longitude * -1;
+    let lat2 = point2.coordinate.latitude;
+    let lon2 = point2.coordinate.longitude * -1;
+
     if ((lat1 == lat2) && (lon1 == lon2)) {
       return 0;
     } else {
@@ -83,6 +91,7 @@ class CustomMarkers extends React.Component {
       let theta = lon1 - lon2;
       let radtheta = Math.PI * theta / 180;
       let dist = Math.sin(radlat1) * Math.sin(radlat2) + Math.cos(radlat1) * Math.cos(radlat2) * Math.cos(radtheta);
+
       if (dist > 1) {
         dist = 1;
       }
@@ -99,6 +108,15 @@ class CustomMarkers extends React.Component {
     }
   };
 
+  verifDistance = () => {
+    this.state.markers.map((marker, index) => {
+      let dist = this.getDistance(marker, this.state.averageMarker, 'M');
+      // Alert.alert(marker.title + ' DIST : ' + dist);
+      if (dist > RadiusCircle) {
+        Alert.alert(marker.title + ' est trop loin ! dist : ' + dist);
+      }
+    });
+  };
 
   centerCircle = () => {
     let totalLatitude = 0;
@@ -110,18 +128,30 @@ class CustomMarkers extends React.Component {
       totalLongitude = totalLongitude + marker.coordinate.longitude;
       averageLatitude = totalLatitude / (index + 1);
       averageLongitude = totalLongitude / (index + 1);
-      this.setState({
-        averageMarker: {
-          title: 'Average',
-          coordinate: {
-            latitude: averageLatitude,
-            longitude: averageLongitude,
-          },
-        },
-      });
     });
-    Alert.alert('lat :' + averageLatitude + 'long :' + averageLongitude,
-    );
+
+    this.setState({
+      averageMarker: {
+        title: 'Average',
+        coordinate: {
+          latitude: averageLatitude,
+          longitude: averageLongitude,
+        },
+      },
+    });
+
+    this.setState({
+      averageMarker: {
+        title: 'Average',
+        coordinate: {
+          latitude: averageLatitude,
+          longitude: averageLongitude,
+        },
+      },
+    }, () => {
+      this.verifDistance();
+    });
+
   };
 
   componentDidMount() {
@@ -154,8 +184,8 @@ class CustomMarkers extends React.Component {
       },
       {distanceFilter: 10},
     );
-
     this.centerCircle();
+
   }
 
 
@@ -193,7 +223,7 @@ class CustomMarkers extends React.Component {
           <View>
             <MapView.Circle
               center={this.state.averageMarker.coordinate}
-              radius={100}
+              radius={RadiusCircle}
               strokeColor={'rgba(1, 66, 96, 1)'}
               strokeWidth={1}
               fillColor={'rgba(1, 66, 96, 0.2)'}
