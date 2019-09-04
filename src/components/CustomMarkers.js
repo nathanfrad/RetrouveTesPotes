@@ -19,9 +19,10 @@ const {width, height} = Dimensions.get('window');
 const ASPECT_RATIO = width / height;
 const LATITUDE = 37.78825;
 const LONGITUDE = -122.4324;
-const LATITUDE_DELTA = 0.0922;
+const LATITUDE_DELTA = 0.006922;
 const LONGITUDE_DELTA = LATITUDE_DELTA * ASPECT_RATIO;
-let id = 0;
+const USER = 'Nathan';
+
 
 class CustomMarkers extends React.Component {
   constructor(props) {
@@ -41,24 +42,24 @@ class CustomMarkers extends React.Component {
       },
       markers: [
         {
-          title: 'hello1',
+          title: 'Arthur',
           coordinate: {
-            latitude: 37.78825,
-            longitude: -122.4324,
+            latitude: 37.76607333,
+            longitude: -122.4405400,
           },
         },
         {
-          title: 'hello2',
+          title: 'Paul',
           coordinate: {
-            latitude: 37.75,
-            longitude: -122.43,
+            latitude: 37.76609333,
+            longitude: -122.4423040,
           },
         },
         {
-          title: 'hello3',
+          title: 'Jean',
           coordinate: {
-            latitude: 37.76,
-            longitude: -122.46,
+            latitude: 37.76606333,
+            longitude: -122.4400500,
           },
         },
       ],
@@ -73,12 +74,76 @@ class CustomMarkers extends React.Component {
     longitudeDelta: LONGITUDE_DELTA,
   });
 
+  distance = (lat1, lon1, lat2, lon2, unit) => {
+    if ((lat1 == lat2) && (lon1 == lon2)) {
+      return 0;
+    } else {
+      let radlat1 = Math.PI * lat1 / 180;
+      let radlat2 = Math.PI * lat2 / 180;
+      let theta = lon1 - lon2;
+      let radtheta = Math.PI * theta / 180;
+      let dist = Math.sin(radlat1) * Math.sin(radlat2) + Math.cos(radlat1) * Math.cos(radlat2) * Math.cos(radtheta);
+      if (dist > 1) {
+        dist = 1;
+      }
+      dist = Math.acos(dist);
+      dist = dist * 180 / Math.PI;
+      dist = dist * 60 * 1.1515;
+      if (unit == 'K') {
+        dist = dist * 1.609344;
+      }
+      if (unit == 'N') {
+        dist = dist * 0.8684;
+      }
+      return dist;
+    }
+  };
+
+
+  centerCircle = () => {
+    let totalLatitude = 0;
+    let totalLongitude = 0;
+    let averageLatitude = 0;
+    let averageLongitude = 0;
+    this.state.markers.map((marker, index) => {
+      totalLatitude = totalLatitude + marker.coordinate.latitude;
+      totalLongitude = totalLongitude + marker.coordinate.longitude;
+      averageLatitude = totalLatitude / (index + 1);
+      averageLongitude = totalLongitude / (index + 1);
+      this.setState({
+        averageMarker: {
+          title: 'Average',
+          coordinate: {
+            latitude: averageLatitude,
+            longitude: averageLongitude,
+          },
+        },
+      });
+    });
+    Alert.alert('lat :' + averageLatitude + 'long :' + averageLongitude,
+    );
+  };
+
   componentDidMount() {
 
     Geolocation.watchPosition(
-      position => {
-        const {latitude, longitude} = position.coords;
+      positionUser => {
+        const {latitude, longitude} = positionUser.coords;
         this.setState({latitude, longitude});
+
+        this.setState({
+          markers: [
+            ...this.state.markers,
+            {
+              title: USER,
+              coordinate: {
+                latitude: latitude,
+                longitude: longitude,
+              },
+            },
+          ],
+        });
+
       },
       error => console.log(error),
       {
@@ -87,33 +152,12 @@ class CustomMarkers extends React.Component {
         maximumAge: 1000,
         distanceFilter: 10,
       },
+      {distanceFilter: 10},
     );
+
+    this.centerCircle();
   }
 
-
-  // componentDidMount(): void {
-  //   let totalLatitude = 0;
-  //   let totalLongitude = 0;
-  //   let averageLatitude = 0;
-  //   let averageLongitude = 0;
-  //   this.state.markers.map((marker, index) => {
-  //     totalLatitude = totalLatitude + marker.coordinate.latitude;
-  //     totalLongitude = totalLongitude + marker.coordinate.longitude;
-  //     averageLatitude = totalLatitude / (index + 1);
-  //     averageLongitude = totalLongitude / (index + 1);
-  //     this.setState({
-  //       averageMarker: {
-  //         title: 'Average',
-  //         coordinate: {
-  //           latitude: averageLatitude,
-  //           longitude: averageLongitude,
-  //         },
-  //       },
-  //     });
-  //   });
-  //   Alert.alert('lat :' + averageLatitude + 'long :' + averageLongitude,
-  //   );
-  // }
 
   render() {
     return (
@@ -124,31 +168,45 @@ class CustomMarkers extends React.Component {
           region={this.getMapRegion()}
           // initialRegion={this.state.region}
         >
-          {this.state.markers.map((marker, index) => (
-            <Marker
-              title={marker.title}
-              image={flagPinkImg}
-              key={index}
-              coordinate={marker.coordinate}
-            />
-          ))}
+
+          {this.state.markers.map((marker, index) => {
+            if (marker.title === USER) {
+              return (<Marker
+                description={marker.title}
+                title={marker.title}
+                pinColor={'green'}
+                key={index}
+                coordinate={marker.coordinate}
+              />);
+            } else {
+              return (<Marker
+                description={marker.title}
+                title={marker.title}
+                pinColor={'blue'}
+                key={index}
+                coordinate={marker.coordinate}
+              />);
+            }
+          })}
 
           {this.state.averageMarker &&
           <View>
             <MapView.Circle
               center={this.state.averageMarker.coordinate}
-              radius={1000}
-              strokeColor='#4F6D7A'
-              strokeWidth={2}
+              radius={100}
+              strokeColor={'rgba(1, 66, 96, 1)'}
+              strokeWidth={1}
+              fillColor={'rgba(1, 66, 96, 0.2)'}
             />
             <Marker
               title={this.state.averageMarker.title}
               key={'8'}
+              pinColor={'red'}
               coordinate={this.state.averageMarker.coordinate}/>
           </View>
           }
 
-          <Marker coordinate={this.getMapRegion()}/>
+          {/*<Marker coordinate={this.getMapRegion()}/>*/}
 
         </MapView>
 
