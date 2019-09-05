@@ -25,13 +25,16 @@ import {
   DebugInstructions,
   ReloadInstructions,
 } from 'react-native/Libraries/NewAppScreen';
-import Maps from './components/Maps';
-import ViewMaps from './containers/ViewMaps';
+import CustomMarkers from './components/Maps';
+import Maps from '../components/Maps';
 
 const App = () => {
   return (
     <View style={styles.container}>
-      <ViewMaps/>
+      <Text>
+        Edit App.js to change this screen and turn it
+        into your app.
+      </Text>
     </View>
   );
 };

@@ -7,7 +7,6 @@
  */
 
 import React, {Fragment} from 'react';
-import MapView, {PROVIDER_GOOGLE} from 'react-native-maps'; // remove PROVIDER_GOOGLE import if not using Google Maps
 
 import {
   SafeAreaView,
@@ -18,21 +17,11 @@ import {
   StatusBar,
 } from 'react-native';
 
-import {
-  Header,
-  LearnMoreLinks,
-  Colors,
-  DebugInstructions,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
-import Maps from './components/Maps';
-import ViewMaps from './containers/ViewMaps';
+import Maps from '../components/Maps';
 
-const App = () => {
+const ViewMaps = () => {
   return (
-    <View style={styles.container}>
-      <ViewMaps/>
-    </View>
+    <Maps/>
   );
 };
 
@@ -49,4 +38,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default App;
+export default ViewMaps;

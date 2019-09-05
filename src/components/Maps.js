@@ -24,7 +24,7 @@ const USER = 'Nathan';
 const RadiusCircle = 100;
 
 
-class CustomMarkers extends React.Component {
+class Maps extends React.Component {
   constructor(props) {
     super(props);
 
@@ -252,7 +252,7 @@ class CustomMarkers extends React.Component {
   }
 }
 
-CustomMarkers.propTypes = {
+Maps.propTypes = {
   provider: PROVIDER_GOOGLE,
 };
 
@@ -288,4 +288,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default CustomMarkers;
+export default Maps;
