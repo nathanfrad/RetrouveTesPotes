@@ -27,6 +27,14 @@ target 'RetrouveTesPotes' do
   pod 'glog', :podspec => '../node_modules/react-native/third-party-podspecs/glog.podspec'
   pod 'Folly', :podspec => '../node_modules/react-native/third-party-podspecs/Folly.podspec'
 
+  # add pods for desired Firebase products
+  # https://firebase.google.com/docs/ios/setup#available-pods
+  pod 'Firebase/Analytics'
+  pod 'Firebase/Database'
+
+
+
+
 
 
   target 'RetrouveTesPotesTests' do

@@ -7,49 +7,79 @@
  */
 
 import React, {Fragment} from 'react';
-import MapView, {PROVIDER_GOOGLE} from 'react-native-maps'; // remove PROVIDER_GOOGLE import if not using Google Maps
-
+import firebase from 'firebase';
 import {
-  SafeAreaView,
-  StyleSheet,
-  ScrollView,
+  Button,
   View,
+  SafeAreaView,
+  FlatList,
+  TouchableOpacity,
   Text,
-  StatusBar,
 } from 'react-native';
 
-import {
-  Header,
-  LearnMoreLinks,
-  Colors,
-  DebugInstructions,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
-import CustomMarkers from './components/Maps';
-import Maps from '../components/Maps';
+export default class Home extends React.Component {
+  constructor(props) {
+    super(props);
 
-const App = () => {
-  return (
-    <View style={styles.container}>
-      <Text>
-        Edit App.js to change this screen and turn it
-        into your app.
-      </Text>
-    </View>
-  );
-};
+  }
 
-const styles = StyleSheet.create({
-  container: {
-    ...StyleSheet.absoluteFillObject,
-    height: '100%',
-    width: '100%',
-    justifyContent: 'flex-end',
-    alignItems: 'center',
-  },
-  map: {
-    ...StyleSheet.absoluteFillObject,
-  },
-});
+  state = {
+    events: [],
+  };
 
-export default App;
+  componentDidMount() {
+
+    // Your web app's Firebase configuration
+    var firebaseConfig = {
+      apiKey: 'AIzaSyAFQkhCf2j7zR_zMgur9Ih5YI0O1CxVL2Q',
+      authDomain: 'retrouvetespotes.firebaseapp.com',
+      databaseURL: 'https://retrouvetespotes.firebaseio.com',
+      projectId: 'retrouvetespotes',
+      storageBucket: '',
+      messagingSenderId: '162773113245',
+      appId: '1:162773113245:web:fbb1d9297cff79ba2cf774',
+    };
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+
+
+    let dbRef = firebase.database().ref('events');
+    dbRef.on('child_added', (val) => {
+      let evenement = val.val();
+      evenement.titre = val.key;
+      this.setState((prevState) => {
+        return {
+          events: [...prevState.events, evenement],
+        };
+      });
+    });
+  }
+
+  renderRow = ({item}) => {
+    return (<TouchableOpacity>
+      <Text> {item.titre}</Text>
+    </TouchableOpacity>);
+  };
+
+  render() {
+    const {navigate} = this.props.navigation;
+    return (
+      <View>
+        <Button
+          title="Go to Maps"
+          onPress={() => navigate('ViewMaps')}
+        />
+
+        <Button
+          title="Créer une soirée"
+          onPress={() => navigate('AddEvent')}
+        />
+        <SafeAreaView>
+          <FlatList keyExtractor={(item) => item.titre} data={this.state.events} renderItem={this.renderRow}/>
+        </SafeAreaView>
+
+
+      </View>
+    );
+  }
+}

@@ -1,52 +1,31 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- * @flow
- */
-
-import React, {Fragment} from 'react';
-import MapView, {PROVIDER_GOOGLE} from 'react-native-maps'; // remove PROVIDER_GOOGLE import if not using Google Maps
-
-import {
-  SafeAreaView,
-  StyleSheet,
-  ScrollView,
-  View,
-  Text,
-  StatusBar,
-} from 'react-native';
-
-import {
-  Header,
-  LearnMoreLinks,
-  Colors,
-  DebugInstructions,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
-import Maps from './components/Maps';
+import {createAppContainer} from 'react-navigation';
+import {createStackNavigator} from 'react-navigation-stack';
+import Home from './containers/Home';
 import ViewMaps from './containers/ViewMaps';
+import AddEvent from './containers/AddEvent/AddEvent';
 
-const App = () => {
-  return (
-    <View style={styles.container}>
-      <ViewMaps/>
-    </View>
-  );
-};
+const MainNavigator = createStackNavigator({
 
-const styles = StyleSheet.create({
-  container: {
-    ...StyleSheet.absoluteFillObject,
-    height: '100%',
-    width: '100%',
-    justifyContent: 'flex-end',
-    alignItems: 'center',
+  Home: {
+    screen: Home, navigationOptions: ({navigation}) => ({
+      title: 'RetrouveTesPotes',
+    }),
   },
-  map: {
-    ...StyleSheet.absoluteFillObject,
+  ViewMaps: {
+    screen: ViewMaps, navigationOptions: ({navigation}) => ({
+      title: 'Maps',
+    }),
   },
+  AddEvent: {
+    screen: AddEvent, navigationOptions: ({navigation}) => ({
+      title: 'Créer une soirée',
+    }),
+  },
+}, {
+  initialRouteName: 'Home',
 });
 
+const App = createAppContainer(MainNavigator);
+
 export default App;
+

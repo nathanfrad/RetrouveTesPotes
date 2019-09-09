@@ -193,6 +193,7 @@ class Maps extends React.Component {
       <View style={styles.container}>
         <MapView
           provider={this.props.provider}
+          //provider={PROVIDER_GOOGLE}
           style={styles.map}
           region={this.getMapRegion()}
           // initialRegion={this.state.region}
