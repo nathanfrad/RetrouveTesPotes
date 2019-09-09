@@ -46,7 +46,7 @@ export default class Home extends React.Component {
     let dbRef = firebase.database().ref('events');
     dbRef.on('child_added', (val) => {
       let evenement = val.val();
-      evenement.titre = val.key;
+      evenement.id = val.key;
       this.setState((prevState) => {
         return {
           events: [...prevState.events, evenement],
@@ -56,7 +56,9 @@ export default class Home extends React.Component {
   }
 
   renderRow = ({item}) => {
-    return (<TouchableOpacity>
+    return (<TouchableOpacity
+      onPress={() => this.props.navigation.navigate('Event', item)}
+      style={{padding: 10, borderBottomColor: '#ccc', borderBottomWidth: 1}}>
       <Text> {item.titre}</Text>
     </TouchableOpacity>);
   };
@@ -75,7 +77,7 @@ export default class Home extends React.Component {
           onPress={() => navigate('AddEvent')}
         />
         <SafeAreaView>
-          <FlatList keyExtractor={(item) => item.titre} data={this.state.events} renderItem={this.renderRow}/>
+          <FlatList keyExtractor={(item) => item.id} data={this.state.events} renderItem={this.renderRow}/>
         </SafeAreaView>
 
 

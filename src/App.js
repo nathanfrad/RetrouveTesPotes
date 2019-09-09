@@ -3,6 +3,7 @@ import {createStackNavigator} from 'react-navigation-stack';
 import Home from './containers/Home';
 import ViewMaps from './containers/ViewMaps';
 import AddEvent from './containers/AddEvent/AddEvent';
+import Event from './containers/Event';
 
 const MainNavigator = createStackNavigator({
 
@@ -20,6 +21,9 @@ const MainNavigator = createStackNavigator({
     screen: AddEvent, navigationOptions: ({navigation}) => ({
       title: 'Créer une soirée',
     }),
+  },
+  Event: {
+    screen: Event,
   },
 }, {
   initialRouteName: 'Home',
