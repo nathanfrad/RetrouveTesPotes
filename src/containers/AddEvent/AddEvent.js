@@ -86,13 +86,20 @@ export default class AddEvent extends React.Component {
   }
 
   addParticipant(value) {
-
+    if (this.state.participants.length !== 0) {
+      this.setState({user: true});
+    }
     if (value !== '' && this.state.participants.includes(value)) {
       this.setState({participants: [...this.state.participants, '']});
-      Alert.alert(this.state.participants);
     } else {
       Alert.alert('bip error');
     }
+  }
+
+  removeParticipant(index) {
+    this.state.participants.splice(index, 1);
+    this.setState({participants: this.state.participants});
+
   }
 
   handleChange(value, index) {
@@ -143,33 +150,37 @@ export default class AddEvent extends React.Component {
           </View>
 
           <View style={styles.containerLabelInput}>
+            <Text numberOfLines={1}>
+              Participants
+            </Text>
 
             {
               this.state.participants.map((name, index) => {
                 return (
-                  <View style={{flexDirection: 'column'}}>
+                  <View style={{flexDirection: 'row'}}>
                     <View key={index}
                           style={{width: '80%'}}>
-                      <Text numberOfLines={1}>
-                        Participants
-                      </Text>
                       <TextInput
                         style={[styles.textinput, this.state.style]}
                         onChangeText={(value) => this.handleChange(value, index)} s
                         value={name}
                         autoCompleteType={'name'}
+                        placeholder={this.state.user ? 'Autre participant' : 'Votre nom'}
                       />
                     </View>
 
-                    <Text>
-                      {this.state.participants[index]} {index}
-                    </Text>
-
-                    <Button
-                      title="Add"
-                      color="green"
-                      onPress={() => this.addParticipant(name)}
-                    />
+                    {this.state.participants.length - 1 === index ? (
+                      <Button
+                        title="Add"
+                        color="green"
+                        onPress={() => this.addParticipant(name)}
+                      />) : (
+                      <Button
+                        title="Suprr"
+                        color="red"
+                        onPress={() => this.removeParticipant(index)}
+                      />
+                    )}
                   </View>
                 );
 
