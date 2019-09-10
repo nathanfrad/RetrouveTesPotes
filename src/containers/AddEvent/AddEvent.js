@@ -88,9 +88,8 @@ export default class AddEvent extends React.Component {
   addParticipant(value) {
 
     if (value !== '' && this.state.participants.includes(value)) {
-      this.setState({participants: [...this.state.participants, value]}, () => {
-        Alert.alert(this.state.participants);
-      });
+      this.setState({participants: [...this.state.participants, '']});
+      Alert.alert(this.state.participants);
     } else {
       Alert.alert('bip error');
     }
@@ -147,57 +146,34 @@ export default class AddEvent extends React.Component {
 
             {
               this.state.participants.map((name, index) => {
-                  if (this.state.participants.length === 0) {
-                    return (
-                      <View key={index}
-                            style={{flexDirection: 'row'}}>
-                        <View style={{width: '80%'}}>
-                          <Text numberOfLines={1}>
-                            Votre nom
-                          </Text>
-                          <TextInput
-                            style={[styles.textinput, this.state.style]}
-                            onChangeText={(value) => this.handleChange(value, index)}
-                            value={name}
-                            autoCompleteType={'name'}
-                          />
-                        </View>
+                return (
+                  <View style={{flexDirection: 'column'}}>
+                    <View key={index}
+                          style={{width: '80%'}}>
+                      <Text numberOfLines={1}>
+                        Participants
+                      </Text>
+                      <TextInput
+                        style={[styles.textinput, this.state.style]}
+                        onChangeText={(value) => this.handleChange(value, index)} s
+                        value={name}
+                        autoCompleteType={'name'}
+                      />
+                    </View>
 
-                        <Button
-                          title="Add"
-                          color="green"
-                          onPress={() => this.addParticipant(name)}
-                        />
-                      </View>
-                    );
+                    <Text>
+                      {this.state.participants[index]} {index}
+                    </Text>
 
-                  } else {
-                    return (
-                      <View style={{flexDirection: 'row'}}>
-                        <View key={index}
-                              style={{width: '80%'}}>
-                          <Text numberOfLines={1}>
-                            Participants
-                          </Text>
-                          <TextInput
-                            style={[styles.textinput, this.state.style]}
-                            onChangeText={(value) => this.handleChange(value, index)}
-                            value={name}
-                            autoCompleteType={'name'}
-                          />
-                        </View>
+                    <Button
+                      title="Add"
+                      color="green"
+                      onPress={() => this.addParticipant(name)}
+                    />
+                  </View>
+                );
 
-                        <Button
-                          title="Add"
-                          color="green"
-                          onPress={() => this.addParticipant(name)}
-                        />
-                      </View>
-                    );
-                  }
-
-                },
-              )
+              })
             }
 
 
