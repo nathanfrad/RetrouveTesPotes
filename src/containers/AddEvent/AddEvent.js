@@ -18,16 +18,10 @@ export default class AddEvent extends React.Component {
     super(props);
     const error = [];
     this.state = {
-      participants: [
-        {
-          nom: '',
-          propri: true,
-        },
-        {
-          nom: '',
-          createur: false,
-        },
-      ],
+      titre: '',
+      description: '',
+      user: '',
+      participants: [''],
     };
   }
 
@@ -69,16 +63,42 @@ export default class AddEvent extends React.Component {
 
   submit() {
 
-    if (this.state.titre === '') {
+    if (this.state.titre === '' || this.state.user === '') {
       // this.inputTitre.setNativeProps({
       //   borderBottomColor: 'red',
       // });
       Alert.alert('veuillez renseigner un titre');
     } else {
-      Alert.alert('envoie des données a la base');
-      firebase.database().ref('events/').push().set({titre: this.state.titre});
+
+      let dbRefEvent = firebase.database().ref('events/');
+
+      let dbRefEventPush = dbRefEvent.push();
+
+      let key = dbRefEventPush.getKey();
+      Alert.alert(key);
+      dbRefEvent.child(key).set({
+        titre: this.state.titre,
+        user: this.state.user,
+      });
+
       this.props.navigation.navigate('Home');
     }
+  }
+
+  addParticipant(value) {
+
+    if (value !== '' && this.state.participants.includes(value)) {
+      this.setState({participants: [...this.state.participants, value]}, () => {
+        Alert.alert(this.state.participants);
+      });
+    } else {
+      Alert.alert('bip error');
+    }
+  }
+
+  handleChange(value, index) {
+    this.state.participants[index] = value;
+    this.setState({participants: this.state.participants});
   }
 
 
@@ -124,21 +144,67 @@ export default class AddEvent extends React.Component {
           </View>
 
           <View style={styles.containerLabelInput}>
-            <Text numberOfLines={1}>
-              Votre nom
-            </Text>
-            <TextInput
-              style={[styles.textinput, this.state.style]}
-              onChangeText={this.handleDescription}
-              // value={value}
-              autoCompleteType={'name'}
 
-            />
+            {
+              this.state.participants.map((name, index) => {
+                  if (this.state.participants.length === 0) {
+                    return (
+                      <View key={index}
+                            style={{flexDirection: 'row'}}>
+                        <View style={{width: '80%'}}>
+                          <Text numberOfLines={1}>
+                            Votre nom
+                          </Text>
+                          <TextInput
+                            style={[styles.textinput, this.state.style]}
+                            onChangeText={(value) => this.handleChange(value, index)}
+                            value={name}
+                            autoCompleteType={'name'}
+                          />
+                        </View>
+
+                        <Button
+                          title="Add"
+                          color="green"
+                          onPress={() => this.addParticipant(name)}
+                        />
+                      </View>
+                    );
+
+                  } else {
+                    return (
+                      <View style={{flexDirection: 'row'}}>
+                        <View key={index}
+                              style={{width: '80%'}}>
+                          <Text numberOfLines={1}>
+                            Participants
+                          </Text>
+                          <TextInput
+                            style={[styles.textinput, this.state.style]}
+                            onChangeText={(value) => this.handleChange(value, index)}
+                            value={name}
+                            autoCompleteType={'name'}
+                          />
+                        </View>
+
+                        <Button
+                          title="Add"
+                          color="green"
+                          onPress={() => this.addParticipant(name)}
+                        />
+                      </View>
+                    );
+                  }
+
+                },
+              )
+            }
+
+
           </View>
-
           <Button
-            title="Press me"
-            color="#f194ff"
+            title='Press me'
+            color='#f194ff'
             onPress={() => this.submit()}
           />
 
@@ -193,8 +259,8 @@ const styles = StyleSheet.create({
 });
 
 
-// import React, { useState, useEffect } from 'react';
-// import { View, Text, Button } from 'react-native';
+// import React, {useState, useEffect} from 'react';
+// import {View, Text, Button} from 'react-native';
 //
 // export const Example = () => {
 //   const [foo, setFoo] = useState(30);
