@@ -86,11 +86,10 @@ export default class AddEvent extends React.Component {
           // ref participant_enrolments
           // ref event_enrolments
           let updates = {
-            [`event_enrolments/${keyEvents}/${keyParticipants}`]: participant,
-            [`participant_enrolments/${keyParticipants}/${keyEvents}`]: this.state.titre,
+            [`event_enrolments/${keyEvents}/${keyParticipants}`]: {name: participant},
+            [`participant_enrolments/${keyParticipants}/${keyEvents}`]: {titre: this.state.titre},
           };
           firebase.database().ref().update(updates);
-
 
         });
       });

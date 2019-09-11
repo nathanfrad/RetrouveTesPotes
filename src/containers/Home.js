@@ -46,7 +46,7 @@ export default class Home extends React.Component {
     let dbRef = firebase.database().ref('events');
     dbRef.on('child_added', (val) => {
       let evenement = val.val();
-      evenement.id = val.key;
+      evenement.id = val.key; 
       this.setState((prevState) => {
         return {
           events: [...prevState.events, evenement],

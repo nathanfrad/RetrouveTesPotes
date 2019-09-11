@@ -38,18 +38,16 @@ export default class Event extends React.Component {
     // List Student enrolments for a class
     database.ref(`event_enrolments/${this.state.event.id}`).once('value')
       .then((snapshot) => {
-        this.setState({participants: [...this.state.participants, snapshot.val()]});
-        let returnArr = [];
 
         snapshot.forEach(function (childSnapshot) {
           let item = childSnapshot.val();
           item.key = childSnapshot.key;
 
-          returnArr.push(item);
+          this.setState({participants: [...this.state.participants, item]});
         });
 
-        Alert.alert(returnArr);
-      });
+
+      }).then(Alert.alert(this.state.participants[0].name));
 
     // // Get Class Metadata using classId
     // database.ref(`events/${this.state.event.id}`).once('value')
