@@ -63,25 +63,52 @@ export default class AddEvent extends React.Component {
 
   submit() {
 
-    if (this.state.titre === '' || this.state.user === '') {
+    if (this.state.titre !== '' || this.state.participants.length !== 1) {
+
+      // ref events
+      let dbRefEvent = firebase.database().ref('events/');
+      let dbRefEventPush = dbRefEvent.push();
+      let keyEvents = dbRefEventPush.getKey();
+      dbRefEvent.child(keyEvents).set({
+        titre: this.state.titre,
+
+
+      }).then(() => {
+
+        // ref Participants
+        let dbRefParticipants = firebase.database().ref('participants/');
+        this.state.participants.map((participant) => {
+          let dbRefParticipantsPush = dbRefEvent.push();
+          let keyParticipants = dbRefParticipantsPush.getKey();
+          dbRefParticipants.child(keyParticipants).set({
+            name: participant,
+          });
+          // ref participant_enrolments
+          // ref event_enrolments
+          let updates = {
+            [`event_enrolments/${keyEvents}/${keyParticipants}`]: participant,
+            [`participant_enrolments/${keyParticipants}/${keyEvents}`]: this.state.titre,
+          };
+          firebase.database().ref().update(updates);
+
+
+        });
+      });
+
+
+      // let dbRefParticipant = firebase.database().ref('events/participant');
+      //
+      // let dbRefParticipantPush = dbRefEvent.push();
+
+      this.props.navigation.navigate('Home');
+
+
+    } else {
+
       // this.inputTitre.setNativeProps({
       //   borderBottomColor: 'red',
       // });
       Alert.alert('veuillez renseigner un titre');
-    } else {
-
-      let dbRefEvent = firebase.database().ref('events/');
-
-      let dbRefEventPush = dbRefEvent.push();
-
-      let key = dbRefEventPush.getKey();
-      Alert.alert(key);
-      dbRefEvent.child(key).set({
-        titre: this.state.titre,
-        user: this.state.user,
-      });
-
-      this.props.navigation.navigate('Home');
     }
   }
 
@@ -103,7 +130,7 @@ export default class AddEvent extends React.Component {
   }
 
   handleChange(value, index) {
-    this.state.participants[index] = value;
+    this.state.participants[index] = value.trim();
     this.setState({participants: this.state.participants});
   }
 

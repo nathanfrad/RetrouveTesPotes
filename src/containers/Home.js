@@ -15,17 +15,17 @@ import {
   FlatList,
   TouchableOpacity,
   Text,
+  Alert,
 } from 'react-native';
 
 export default class Home extends React.Component {
   constructor(props) {
     super(props);
-
+    this.state = {
+      events: [],
+    };
   }
 
-  state = {
-    events: [],
-  };
 
   componentDidMount() {
 
