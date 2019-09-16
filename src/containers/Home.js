@@ -26,9 +26,7 @@ export default class Home extends React.Component {
     };
   }
 
-
   componentDidMount() {
-
     // Your web app's Firebase configuration
     var firebaseConfig = {
       apiKey: 'AIzaSyAFQkhCf2j7zR_zMgur9Ih5YI0O1CxVL2Q',
@@ -41,13 +39,15 @@ export default class Home extends React.Component {
     };
     // Initialize Firebase
     firebase.initializeApp(firebaseConfig);
-
+    firebase.database().isPersistenceEnabled = true;
+    // let scoresRef = firebase.database().reference('scores');
+    // scoresRef.keepSynced(true)
 
     let dbRef = firebase.database().ref('events');
-    dbRef.on('child_added', (val) => {
+    dbRef.on('child_added', val => {
       let evenement = val.val();
-      evenement.id = val.key; 
-      this.setState((prevState) => {
+      evenement.id = val.key;
+      this.setState(prevState => {
         return {
           events: [...prevState.events, evenement],
         };
@@ -56,31 +56,29 @@ export default class Home extends React.Component {
   }
 
   renderRow = ({item}) => {
-    return (<TouchableOpacity
-      onPress={() => this.props.navigation.navigate('Event', item)}
-      style={{padding: 10, borderBottomColor: '#ccc', borderBottomWidth: 1}}>
-      <Text> {item.titre}</Text>
-    </TouchableOpacity>);
+    return (
+      <TouchableOpacity
+        onPress={() => this.props.navigation.navigate('Event', item)}
+        style={{padding: 10, borderBottomColor: '#ccc', borderBottomWidth: 1}}>
+        <Text> {item.titre}</Text>
+      </TouchableOpacity>
+    );
   };
 
   render() {
     const {navigate} = this.props.navigation;
     return (
       <View>
-        <Button
-          title="Go to Maps"
-          onPress={() => navigate('ViewMaps')}
-        />
+        <Button title="Go to Maps" onPress={() => navigate('ViewMaps')}/>
 
-        <Button
-          title="Créer une soirée"
-          onPress={() => navigate('AddEvent')}
-        />
+        <Button title="Créer une soirée" onPress={() => navigate('AddEvent')}/>
         <SafeAreaView>
-          <FlatList keyExtractor={(item) => item.id} data={this.state.events} renderItem={this.renderRow}/>
+          <FlatList
+            keyExtractor={item => item.id}
+            data={this.state.events}
+            renderItem={this.renderRow}
+          />
         </SafeAreaView>
-
-
       </View>
     );
   }

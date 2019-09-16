@@ -13,7 +13,6 @@ import {
 import firebase from 'firebase';
 
 export default class AddEvent extends React.Component {
-
   constructor(props) {
     super(props);
     const error = [];
@@ -24,7 +23,6 @@ export default class AddEvent extends React.Component {
       participants: [''],
     };
   }
-
 
   onFocus() {
     this.inputTitre.setNativeProps({
@@ -37,7 +35,6 @@ export default class AddEvent extends React.Component {
       borderBottomColor: 'black',
     });
   }
-
 
   /* Récupération de la description */
   handleDescription = text => {
@@ -60,50 +57,44 @@ export default class AddEvent extends React.Component {
   //
   //   }
   // }
-
   submit() {
-
     if (this.state.titre !== '' || this.state.participants.length !== 1) {
-
       // ref events
       let dbRefEvent = firebase.database().ref('events/');
       let dbRefEventPush = dbRefEvent.push();
       let keyEvents = dbRefEventPush.getKey();
-      dbRefEvent.child(keyEvents).set({
-        titre: this.state.titre,
-
-
-      }).then(() => {
-
-        // ref Participants
-        let dbRefParticipants = firebase.database().ref('participants/');
-        this.state.participants.map((participant) => {
-          let dbRefParticipantsPush = dbRefEvent.push();
-          let keyParticipants = dbRefParticipantsPush.getKey();
-          dbRefParticipants.child(keyParticipants).set({
-            name: participant,
+      dbRefEvent
+        .child(keyEvents)
+        .set({
+          titre: this.state.titre,
+        })
+        .then(() => {
+          // ref Participants
+          let dbRefParticipants = firebase.database().ref('participants/');
+          this.state.participants.map(participant => {
+            let dbRefParticipantsPush = dbRefEvent.push();
+            let keyParticipants = dbRefParticipantsPush.getKey();
+            dbRefParticipants.child(keyParticipants).set({
+              name: participant,
+            });
+            // ref participant_enrolments
+            // ref event_enrolments
+            let updates = {
+              [`event_enrolments/${keyEvents}/${keyParticipants}`]: {
+                name: participant,
+              },
+              [`participant_enrolments/${keyParticipants}/${keyEvents}`]: {
+                titre: this.state.titre,
+              },
+            };
+            firebase
+              .database()
+              .ref()
+              .update(updates);
           });
-          // ref participant_enrolments
-          // ref event_enrolments
-          let updates = {
-            [`event_enrolments/${keyEvents}/${keyParticipants}`]: {name: participant},
-            [`participant_enrolments/${keyParticipants}/${keyEvents}`]: {titre: this.state.titre},
-          };
-          firebase.database().ref().update(updates);
-
         });
-      });
-
-
-      // let dbRefParticipant = firebase.database().ref('events/participant');
-      //
-      // let dbRefParticipantPush = dbRefEvent.push();
-
       this.props.navigation.navigate('Home');
-
-
     } else {
-
       // this.inputTitre.setNativeProps({
       //   borderBottomColor: 'red',
       // });
@@ -125,7 +116,6 @@ export default class AddEvent extends React.Component {
   removeParticipant(index) {
     this.state.participants.splice(index, 1);
     this.setState({participants: this.state.participants});
-
   }
 
   handleChange(value, index) {
@@ -133,101 +123,83 @@ export default class AddEvent extends React.Component {
     this.setState({participants: this.state.participants});
   }
 
-
   render() {
     const {navigate} = this.props.navigation;
     return (
       <View style={styles.container}>
         <ScrollView>
-
           <View style={styles.containerLabelInput}>
-            <Text numberOfLines={1}>
-              Titre
-            </Text>
+            <Text numberOfLines={1}>Titre</Text>
             <TextInput
-              ref={r => this.inputTitre = r}
+              ref={r => (this.inputTitre = r)}
               style={styles.textinput}
               onChangeText={value => this.setState({titre: value})}
               value={this.state.titre}
               // value={value}
-              onSubmitEditing={(event) => {
+              onSubmitEditing={() => {
                 this.refs.inputDescription.focus();
               }}
-
               onBlur={() => this.onBlur()}
               onFocus={() => this.onFocus()}
             />
           </View>
-
           <View style={styles.containerLabelInput}>
-            <Text numberOfLines={1}>
-              Description
-            </Text>
+            <Text numberOfLines={1}>Description</Text>
             <TextInput
               ref={'inputDescription'}
               style={[styles.textinput, this.state.inputDescription]}
-              onChangeText={(text) => this.setState({description: text})}
+              onChangeText={text => this.setState({description: text})}
               value={this.state.description}
-              onSubmitEditing={(event) => {
+              onSubmitEditing={event => {
                 this.refs.Description.focus();
               }}
-
             />
           </View>
-
           <View style={styles.containerLabelInput}>
-            <Text numberOfLines={1}>
-              Participants
-            </Text>
-
-            {
-              this.state.participants.map((name, index) => {
-                return (
-                  <View style={{flexDirection: 'row'}}>
-                    <View key={index}
-                          style={{width: '80%'}}>
-                      <TextInput
-                        style={[styles.textinput, this.state.style]}
-                        onChangeText={(value) => this.handleChange(value, index)} s
-                        value={name}
-                        autoCompleteType={'name'}
-                        placeholder={this.state.user ? 'Autre participant' : 'Votre nom'}
-                      />
-                    </View>
-
-                    {this.state.participants.length - 1 === index ? (
-                      <Button
-                        title="Add"
-                        color="green"
-                        onPress={() => this.addParticipant(name)}
-                      />) : (
-                      <Button
-                        title="Suprr"
-                        color="red"
-                        onPress={() => this.removeParticipant(index)}
-                      />
-                    )}
+            <Text numberOfLines={1}>Participants</Text>
+            {this.state.participants.map((name, index) => {
+              return (
+                <View style={{flexDirection: 'row'}}>
+                  <View key={index} style={{width: '80%'}}>
+                    <TextInput
+                      style={[styles.textinput, this.state.style]}
+                      onChangeText={value => this.handleChange(value, index)}
+                      s
+                      value={name}
+                      autoCompleteType={'name'}
+                      placeholder={
+                        this.state.user ? 'Autre participant' : 'Votre nom'
+                      }
+                    />
                   </View>
-                );
 
-              })
-            }
-
-
+                  {this.state.participants.length - 1 === index ? (
+                    <Button
+                      title="Add"
+                      color="green"
+                      onPress={() => this.addParticipant(name)}
+                    />
+                  ) : (
+                    <Button
+                      title="Suprr"
+                      color="red"
+                      onPress={() => this.removeParticipant(index)}
+                    />
+                  )}
+                </View>
+              );
+            })}
           </View>
           <Button
-            title='Press me'
-            color='#f194ff'
+            title="Press me"
+            color="#f194ff"
             onPress={() => this.submit()}
           />
-
         </ScrollView>
       </View>
-
     );
   }
 }
-
 
 const styles = StyleSheet.create({
   container: {
@@ -257,9 +229,7 @@ const styles = StyleSheet.create({
   },
   containerLabelInput: {
     marginVertical: 10,
-
   },
-
   textinput: {
     flexDirection: 'row',
     backgroundColor: 'transparent',
@@ -270,7 +240,6 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
   },
 });
-
 
 // import React, {useState, useEffect} from 'react';
 // import {View, Text, Button} from 'react-native';

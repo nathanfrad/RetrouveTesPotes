@@ -8,10 +8,11 @@ import {
   ScrollView,
   StyleSheet,
   Button,
-  Alert, SafeAreaView, FlatList,
+  Alert,
+  SafeAreaView,
+  FlatList,
 } from 'react-native';
 import firebase from 'firebase';
-
 
 export default class Event extends React.Component {
   static navigationOptions = ({navigation}) => {
@@ -26,48 +27,37 @@ export default class Event extends React.Component {
       event: this.props.navigation.state.params,
       participants: [],
     };
-
-
   }
 
   componentDidMount(): void {
-
-
     let database = firebase.database();
 
     // List Student enrolments for a class
-    database.ref(`event_enrolments/${this.state.event.id}`).once('value')
-      .then((snapshot) => {
-
+    database
+      .ref(`event_enrolments/${this.state.event.id}`)
+      .once('value')
+      .then(snapshot => {
+        let returnArr = [];
         snapshot.forEach(function (childSnapshot) {
           let item = childSnapshot.val();
           item.key = childSnapshot.key;
-
-          this.setState({participants: [...this.state.participants, item]});
+          returnArr.push(item);
         });
-
-
-      }).then(Alert.alert(this.state.participants[0].name));
-
-    // // Get Class Metadata using classId
-    // database.ref(`events/${this.state.event.id}`).once('value')
-    //   .then((snapshot) => {
-    //     Alert.alert(snapshot.val());
-    //   });
-
+        this.setState(prevState => ({
+          participants: returnArr,
+        }));
+      });
   }
 
   render() {
     const {navigate} = this.props.navigation;
     return (
       <View>
-        <Text>
-          One Event
-        </Text>
-
+        <Text>One Event</Text>
+        {this.state.participants.map((item, key) => (
+          <Text>{item.name}</Text>
+        ))}
       </View>
     );
   }
-
-
 }
