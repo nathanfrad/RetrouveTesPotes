@@ -47,6 +47,8 @@ export default class Event extends React.Component {
           participants: returnArr,
         }));
       });
+
+
   }
 
   render() {

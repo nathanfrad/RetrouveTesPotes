@@ -40,8 +40,8 @@ export default class Home extends React.Component {
     // Initialize Firebase
     firebase.initializeApp(firebaseConfig);
     firebase.database().isPersistenceEnabled = true;
-    // let scoresRef = firebase.database().reference('scores');
-    // scoresRef.keepSynced(true)
+    let scoresRef = firebase.database().ref('scores');
+    scoresRef.keepSynced(true);
 
     let dbRef = firebase.database().ref('events');
     dbRef.on('child_added', val => {
@@ -52,6 +52,15 @@ export default class Home extends React.Component {
           events: [...prevState.events, evenement],
         };
       });
+    });
+
+    let connectedRef = firebase.database().ref('.info/connected');
+    connectedRef.on('value', function (snap) {
+      if (snap.val() === true) {
+        alert('connected');
+      } else {
+        alert('not connected');
+      }
     });
   }
 
