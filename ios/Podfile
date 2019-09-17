@@ -29,13 +29,6 @@ target 'RetrouveTesPotes' do
 
   # add pods for desired Firebase products
   # https://firebase.google.com/docs/ios/setup#available-pods
-  pod 'Firebase/Analytics'
-  pod 'Firebase/Database'
-
-
-
-
-
 
   target 'RetrouveTesPotesTests' do
     inherit! :search_paths

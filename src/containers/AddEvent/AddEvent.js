@@ -10,7 +10,7 @@ import {
   Button,
   Alert,
 } from 'react-native';
-import firebase from 'firebase';
+import database from '@react-native-firebase/database';
 
 export default class AddEvent extends React.Component {
   constructor(props) {
@@ -60,7 +60,7 @@ export default class AddEvent extends React.Component {
   submit() {
     if (this.state.titre !== '' || this.state.participants.length !== 1) {
       // ref events
-      let dbRefEvent = firebase.database().ref('events/');
+      let dbRefEvent = database().ref('events/');
       let dbRefEventPush = dbRefEvent.push();
       let keyEvents = dbRefEventPush.getKey();
       dbRefEvent
@@ -70,7 +70,7 @@ export default class AddEvent extends React.Component {
         })
         .then(() => {
           // ref Participants
-          let dbRefParticipants = firebase.database().ref('participants/');
+          let dbRefParticipants = database().ref('participants/');
           this.state.participants.map(participant => {
             let dbRefParticipantsPush = dbRefEvent.push();
             let keyParticipants = dbRefParticipantsPush.getKey();
@@ -87,8 +87,7 @@ export default class AddEvent extends React.Component {
                 titre: this.state.titre,
               },
             };
-            firebase
-              .database()
+            database()
               .ref()
               .update(updates);
           });
@@ -159,12 +158,11 @@ export default class AddEvent extends React.Component {
             <Text numberOfLines={1}>Participants</Text>
             {this.state.participants.map((name, index) => {
               return (
-                <View style={{flexDirection: 'row'}}>
-                  <View key={index} style={{width: '80%'}}>
+                <View key={index} style={{flexDirection: 'row'}}>
+                  <View style={{width: '80%'}}>
                     <TextInput
                       style={[styles.textinput, this.state.style]}
                       onChangeText={value => this.handleChange(value, index)}
-                      s
                       value={name}
                       autoCompleteType={'name'}
                       placeholder={
@@ -240,23 +238,3 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
   },
 });
-
-// import React, {useState, useEffect} from 'react';
-// import {View, Text, Button} from 'react-native';
-//
-// export const Example = () => {
-//   const [foo, setFoo] = useState(30);
-//
-//   useEffect(() => {
-//     if (foo >= 42) {
-//       setFoo(42);
-//     }
-//   }, [foo])
-//
-//   return (
-//     <View>
-//       <Text>Foo is {foo}.</Text>
-//       <Button onPress={() => setFoo(foo + 1)} title='Increase Foo!' />
-//     </View>
-//   )
-// }

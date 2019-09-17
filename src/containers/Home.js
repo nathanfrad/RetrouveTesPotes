@@ -7,7 +7,7 @@
  */
 
 import React, {Fragment} from 'react';
-import firebase from 'firebase';
+import database from '@react-native-firebase/database';
 import {
   Button,
   View,
@@ -16,34 +16,23 @@ import {
   TouchableOpacity,
   Text,
   Alert,
+  StyleSheet,
 } from 'react-native';
+import {padding} from '../styles/base';
 
 export default class Home extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       events: [],
+      isConnected: '',
     };
   }
 
   componentDidMount() {
-    // Your web app's Firebase configuration
-    var firebaseConfig = {
-      apiKey: 'AIzaSyAFQkhCf2j7zR_zMgur9Ih5YI0O1CxVL2Q',
-      authDomain: 'retrouvetespotes.firebaseapp.com',
-      databaseURL: 'https://retrouvetespotes.firebaseio.com',
-      projectId: 'retrouvetespotes',
-      storageBucket: '',
-      messagingSenderId: '162773113245',
-      appId: '1:162773113245:web:fbb1d9297cff79ba2cf774',
-    };
-    // Initialize Firebase
-    firebase.initializeApp(firebaseConfig);
-    firebase.database().isPersistenceEnabled = true;
-    let scoresRef = firebase.database().ref('scores');
-    scoresRef.keepSynced(true);
+    // database().setPersistenceEnabled(true);
 
-    let dbRef = firebase.database().ref('events');
+    let dbRef = database().ref('events');
     dbRef.on('child_added', val => {
       let evenement = val.val();
       evenement.id = val.key;
@@ -53,15 +42,11 @@ export default class Home extends React.Component {
         };
       });
     });
-
-    let connectedRef = firebase.database().ref('.info/connected');
-    connectedRef.on('value', function (snap) {
-      if (snap.val() === true) {
-        alert('connected');
-      } else {
-        alert('not connected');
-      }
-    });
+    database()
+      .ref('.info/connected')
+      .on('value', connectedSnap => {
+        this.setState({isConnected: connectedSnap.val()});
+      });
   }
 
   renderRow = ({item}) => {
@@ -78,6 +63,11 @@ export default class Home extends React.Component {
     const {navigate} = this.props.navigation;
     return (
       <View>
+        {this.state.isConnected ? (
+          <Text style={styles.connected}>Connécté</Text>
+        ) : (
+          <Text style={styles.offline}>Déconnéctée</Text>
+        )}
         <Button title="Go to Maps" onPress={() => navigate('ViewMaps')}/>
 
         <Button title="Créer une soirée" onPress={() => navigate('AddEvent')}/>
@@ -92,3 +82,44 @@ export default class Home extends React.Component {
     );
   }
 }
+
+const styles = StyleSheet.create({
+  connected: {
+    alignItems: 'center',
+    padding: padding.md,
+    backgroundColor: 'green',
+  },
+  offline: {
+    alignItems: 'center',
+    padding: padding.md,
+    backgroundColor: 'red',
+  },
+  bubble: {
+    backgroundColor: 'rgba(255,255,255,0.7)',
+    paddingHorizontal: 18,
+    paddingVertical: 12,
+    borderRadius: 20,
+  },
+  latlng: {
+    width: 200,
+    alignItems: 'stretch',
+  },
+  button: {
+    width: 80,
+    paddingHorizontal: 12,
+    alignItems: 'center',
+    marginHorizontal: 10,
+  },
+  containerLabelInput: {
+    marginVertical: 10,
+  },
+  textinput: {
+    flexDirection: 'row',
+    backgroundColor: 'transparent',
+    paddingHorizontal: 6,
+    height: 40,
+    borderColor: 'gray',
+    borderBottomColor: '#47315a',
+    borderBottomWidth: 1,
+  },
+});

@@ -1,6 +1,6 @@
 import React, {Fragment} from 'react';
 import {colors, fonts, padding, dimensions} from '../styles/base.js';
-
+import database from '@react-native-firebase/database';
 import {
   Text,
   View,
@@ -12,7 +12,6 @@ import {
   SafeAreaView,
   FlatList,
 } from 'react-native';
-import firebase from 'firebase';
 
 export default class Event extends React.Component {
   static navigationOptions = ({navigation}) => {
@@ -30,10 +29,8 @@ export default class Event extends React.Component {
   }
 
   componentDidMount(): void {
-    let database = firebase.database();
-
     // List Student enrolments for a class
-    database
+    database()
       .ref(`event_enrolments/${this.state.event.id}`)
       .once('value')
       .then(snapshot => {
@@ -47,8 +44,6 @@ export default class Event extends React.Component {
           participants: returnArr,
         }));
       });
-
-
   }
 
   render() {
@@ -56,8 +51,8 @@ export default class Event extends React.Component {
     return (
       <View>
         <Text>One Event</Text>
-        {this.state.participants.map((item, key) => (
-          <Text>{item.name}</Text>
+        {this.state.participants.map((item, index) => (
+          <Text key={index}>{item.name}</Text>
         ))}
       </View>
     );
