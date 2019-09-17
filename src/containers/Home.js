@@ -19,6 +19,7 @@ import {
   StyleSheet,
 } from 'react-native';
 import {padding} from '../styles/base';
+import AsyncStorage from '@react-native-community/async-storage';
 
 export default class Home extends React.Component {
   constructor(props) {
@@ -30,7 +31,6 @@ export default class Home extends React.Component {
   }
 
   componentDidMount() {
-    // database().setPersistenceEnabled(true);
 
     let dbRef = database().ref('events');
     dbRef.on('child_added', val => {
@@ -47,12 +47,27 @@ export default class Home extends React.Component {
       .on('value', connectedSnap => {
         this.setState({isConnected: connectedSnap.val()});
       });
+    this.getAsyncStorage();
   }
+
+  getAsyncStorage = async () => {
+    try {
+      const user = await AsyncStorage.getItem('userId');
+      this.setState({
+        userId: user,
+      });
+    } catch (error) {
+      // Error retrieving data
+      Alert.alert(error.message);
+    }
+  };
 
   renderRow = ({item}) => {
     return (
       <TouchableOpacity
-        onPress={() => this.props.navigation.navigate('Event', item)}
+        onPress={() => {
+          this.props.navigation.navigate('Event', item);
+        }}
         style={{padding: 10, borderBottomColor: '#ccc', borderBottomWidth: 1}}>
         <Text> {item.titre}</Text>
       </TouchableOpacity>
@@ -68,9 +83,18 @@ export default class Home extends React.Component {
         ) : (
           <Text style={styles.offline}>Déconnéctée</Text>
         )}
-        <Button title="Go to Maps" onPress={() => navigate('ViewMaps')}/>
+        <Text>State : {this.state.userId}</Text>
+        <Button
+          title="Go to Maps"
+          onPress={() => {
+            navigate('Maps');
+          }}
+        />
 
-        <Button title="Créer une soirée" onPress={() => navigate('AddEvent')}/>
+        <Button
+          title="Créer une soirée"
+          onPress={() => navigate('AddEvent', this.state.userId)}
+        />
         <SafeAreaView>
           <FlatList
             keyExtractor={item => item.id}

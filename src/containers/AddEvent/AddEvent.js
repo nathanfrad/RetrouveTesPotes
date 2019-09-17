@@ -11,6 +11,7 @@ import {
   Alert,
 } from 'react-native';
 import database from '@react-native-firebase/database';
+import AsyncStorage from '@react-native-community/async-storage';
 
 export default class AddEvent extends React.Component {
   constructor(props) {
@@ -21,6 +22,7 @@ export default class AddEvent extends React.Component {
       description: '',
       user: '',
       participants: [''],
+      userId: this.props.navigation.state.params,
     };
   }
 
@@ -36,15 +38,6 @@ export default class AddEvent extends React.Component {
     });
   }
 
-  /* Récupération de la description */
-  handleDescription = text => {
-    this.setState({
-      soiree: {
-        description: text,
-      },
-    });
-  };
-
   // validate(value) {
   //   const {titre, description} = this.state;
   //   this.setState({titre: value});
@@ -57,12 +50,32 @@ export default class AddEvent extends React.Component {
   //
   //   }
   // }
+
+  setAsyncStorage = async keyPush => {
+    try {
+      await AsyncStorage.setItem('userId', keyPush);
+    } catch (error) {
+      // Error retrieving data
+      Alert.alert(error.message);
+    }
+  };
+
+  getAsyncStorage = async () => {
+    try {
+      const user = await AsyncStorage.getItem('userId');
+      return user;
+    } catch (error) {
+      // Error retrieving data
+      Alert.alert(error.message);
+    }
+  };
+
   submit() {
     if (this.state.titre !== '' || this.state.participants.length !== 1) {
       // ref events
       let dbRefEvent = database().ref('events/');
       let dbRefEventPush = dbRefEvent.push();
-      let keyEvents = dbRefEventPush.getKey();
+      let keyEvents = dbRefEventPush.key;
       dbRefEvent
         .child(keyEvents)
         .set({
@@ -71,12 +84,24 @@ export default class AddEvent extends React.Component {
         .then(() => {
           // ref Participants
           let dbRefParticipants = database().ref('participants/');
-          this.state.participants.map(participant => {
-            let dbRefParticipantsPush = dbRefEvent.push();
-            let keyParticipants = dbRefParticipantsPush.getKey();
+
+          this.state.participants.map((participant, index) => {
+            let dbRefParticipantsPush;
+            let keyParticipants;
+            if (this.state.userId !== '' && index === 0) {
+              keyParticipants = this.state.userId;
+            } else {
+              dbRefParticipantsPush = dbRefEvent.push();
+              keyParticipants = dbRefParticipantsPush.key;
+              if (index === 0) {
+                this.setAsyncStorage(keyParticipants);
+              }
+            }
+
             dbRefParticipants.child(keyParticipants).set({
               name: participant,
             });
+
             // ref participant_enrolments
             // ref event_enrolments
             let updates = {
@@ -126,6 +151,7 @@ export default class AddEvent extends React.Component {
     const {navigate} = this.props.navigation;
     return (
       <View style={styles.container}>
+        <Text>State : {this.state.userId}</Text>
         <ScrollView>
           <View style={styles.containerLabelInput}>
             <Text numberOfLines={1}>Titre</Text>

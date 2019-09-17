@@ -12,6 +12,7 @@ import {
   SafeAreaView,
   FlatList,
 } from 'react-native';
+import AsyncStorage from '@react-native-community/async-storage';
 
 export default class Event extends React.Component {
   static navigationOptions = ({navigation}) => {
