@@ -19,10 +19,6 @@
 		2DCD954D1E0B4F2C00145EB5 /* RetrouveTesPotesTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 00E356F21AD99517003FC87E /* RetrouveTesPotesTests.m */; };
 		37CF911BEBE658E2397AFB83 /* libPods-RetrouveTesPotes.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 316AB272F907C4F57F8C6E74 /* libPods-RetrouveTesPotes.a */; };
 		CE81821874A39D9FB603AFDC /* libPods-RetrouveTesPotesTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B72CA002514DEC8178D21FA0 /* libPods-RetrouveTesPotesTests.a */; };
-		D8040CC6232654F900808B87 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = D8040CC5232654F900808B87 /* GoogleService-Info.plist */; };
-		D8040CC7232655D700808B87 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = D8040CC5232654F900808B87 /* GoogleService-Info.plist */; };
-		D8040CC8232655D700808B87 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = D8040CC5232654F900808B87 /* GoogleService-Info.plist */; };
-		D8040CC9232655D800808B87 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = D8040CC5232654F900808B87 /* GoogleService-Info.plist */; };
 		D8463B18231E49D3004125E5 /* libreact-native-maps.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D8463B17231E49D3004125E5 /* libreact-native-maps.a */; };
 		D897E0C48547CD055C9C65B9 /* libPods-RetrouveTesPotes-tvOSTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D866581D6B3156D3BCE1B84B /* libPods-RetrouveTesPotes-tvOSTests.a */; };
 /* End PBXBuildFile section */
@@ -65,7 +61,6 @@
 		B72CA002514DEC8178D21FA0 /* libPods-RetrouveTesPotesTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-RetrouveTesPotesTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		C064BDF7D4DC581EC7EC3546 /* Pods-RetrouveTesPotesTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RetrouveTesPotesTests.debug.xcconfig"; path = "Target Support Files/Pods-RetrouveTesPotesTests/Pods-RetrouveTesPotesTests.debug.xcconfig"; sourceTree = "<group>"; };
 		D361543F69D27B106E6B7E63 /* Pods-RetrouveTesPotes-tvOSTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RetrouveTesPotes-tvOSTests.release.xcconfig"; path = "Target Support Files/Pods-RetrouveTesPotes-tvOSTests/Pods-RetrouveTesPotes-tvOSTests.release.xcconfig"; sourceTree = "<group>"; };
-		D8040CC5232654F900808B87 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "GoogleService-Info.plist"; path = "../../../Downloads/GoogleService-Info.plist"; sourceTree = "<group>"; };
 		D8463B17231E49D3004125E5 /* libreact-native-maps.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; path = "libreact-native-maps.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		D866581D6B3156D3BCE1B84B /* libPods-RetrouveTesPotes-tvOSTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-RetrouveTesPotes-tvOSTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		E7260ACC45FEC997D2805CE5 /* Pods-RetrouveTesPotesTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RetrouveTesPotesTests.release.xcconfig"; path = "Target Support Files/Pods-RetrouveTesPotesTests/Pods-RetrouveTesPotesTests.release.xcconfig"; sourceTree = "<group>"; };
@@ -134,7 +129,6 @@
 			isa = PBXGroup;
 			children = (
 				008F07F21AC5B25A0029DE68 /* main.jsbundle */,
-				D8040CC5232654F900808B87 /* GoogleService-Info.plist */,
 				13B07FAF1A68108700A75B9A /* AppDelegate.h */,
 				13B07FB01A68108700A75B9A /* AppDelegate.m */,
 				13B07FB51A68108700A75B9A /* Images.xcassets */,
@@ -349,7 +343,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				D8040CC7232655D700808B87 /* GoogleService-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -359,7 +352,6 @@
 			files = (
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
 				13B07FBD1A68108700A75B9A /* LaunchScreen.xib in Resources */,
-				D8040CC6232654F900808B87 /* GoogleService-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -368,7 +360,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				2D02E4BD1E0B4A84006451C7 /* Images.xcassets in Resources */,
-				D8040CC8232655D700808B87 /* GoogleService-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -376,7 +367,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				D8040CC9232655D800808B87 /* GoogleService-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

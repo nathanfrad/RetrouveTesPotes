@@ -31,7 +31,6 @@ export default class Home extends React.Component {
   }
 
   componentDidMount() {
-
     let dbRef = database().ref('events');
     dbRef.on('child_added', val => {
       let evenement = val.val();
@@ -90,7 +89,6 @@ export default class Home extends React.Component {
             navigate('Maps');
           }}
         />
-
         <Button
           title="Créer une soirée"
           onPress={() => navigate('AddEvent', this.state.userId)}
