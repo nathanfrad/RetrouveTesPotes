@@ -18,11 +18,8 @@ export default class AddEvent extends React.Component {
     super(props);
     const error = [];
     this.state = {
-      titre: '',
-      description: '',
-      user: '',
       participants: [''],
-      userId: this.props.navigation.state.params,
+      ownersArray: this.props.navigation.state.params,
     };
   }
 
@@ -50,28 +47,20 @@ export default class AddEvent extends React.Component {
   //
   //   }
   // }
-
-  setAsyncStorage = async keyPush => {
+  setAsyncStorage = async => {
     try {
-      await AsyncStorage.setItem('userId', keyPush);
+      AsyncStorage.setItem('owners', JSON.stringify(this.state.ownersArray));
     } catch (error) {
       // Error retrieving data
       Alert.alert(error.message);
     }
   };
 
-  getAsyncStorage = async () => {
-    try {
-      const user = await AsyncStorage.getItem('userId');
-      return user;
-    } catch (error) {
-      // Error retrieving data
-      Alert.alert(error.message);
-    }
-  };
+  // componentDidMount(): void {
+  // }
 
   submit() {
-    if (this.state.titre !== '' || this.state.participants.length !== 1) {
+    if (this.state.titre !== '' || this.state.participants.length > 1) {
       // ref events
       let dbRefEvent = database().ref('events/');
       let dbRefEventPush = dbRefEvent.push();
@@ -85,30 +74,43 @@ export default class AddEvent extends React.Component {
           // ref Participants
           let dbRefParticipants = database().ref('participants/');
 
+          // on parcours les participant du formulaire
           this.state.participants.map((participant, index) => {
             let dbRefParticipantsPush;
-            let keyParticipants;
-            if (this.state.userId !== '' && index === 0) {
-              keyParticipants = this.state.userId;
-            } else {
-              dbRefParticipantsPush = dbRefEvent.push();
-              keyParticipants = dbRefParticipantsPush.key;
-              if (index === 0) {
-                this.setAsyncStorage(keyParticipants);
-              }
+            let keyParticipant = 0;
+            if (this.state.ownersArray.length > 0 && index === 0) {
+              // on parcours le tableau owner
+              this.state.ownersArray.map(owner => {
+                // si le nom du premier champ est egale a un des nom du owner
+                if (owner.name === participant) {
+                  keyParticipant = owner.id;
+                }
+              });
             }
-
-            dbRefParticipants.child(keyParticipants).set({
-              name: participant,
-            });
-
+            if (keyParticipant === 0) {
+              dbRefParticipantsPush = dbRefEvent.push();
+              keyParticipant = dbRefParticipantsPush.key;
+              if (index === 0) {
+                Alert.alert('index :' + index);
+                this.setState({
+                  ownersArray: [
+                    ...this.state.ownersArray,
+                    {name: participant, id: keyParticipant},
+                  ],
+                });
+                this.setAsyncStorage();
+              }
+              dbRefParticipants.child(keyParticipant).set({
+                name: participant,
+              });
+            }
             // ref participant_enrolments
             // ref event_enrolments
             let updates = {
-              [`event_enrolments/${keyEvents}/${keyParticipants}`]: {
+              [`event_enrolments/${keyEvents}/${keyParticipant}`]: {
                 name: participant,
               },
-              [`participant_enrolments/${keyParticipants}/${keyEvents}`]: {
+              [`participant_enrolments/${keyParticipant}/${keyEvents}`]: {
                 titre: this.state.titre,
               },
             };
@@ -133,7 +135,7 @@ export default class AddEvent extends React.Component {
     if (value !== '' && this.state.participants.includes(value)) {
       this.setState({participants: [...this.state.participants, '']});
     } else {
-      Alert.alert('bip error');
+      Alert.alert('Ce nom est déja present dans la liste');
     }
   }
 
@@ -215,7 +217,7 @@ export default class AddEvent extends React.Component {
             })}
           </View>
           <Button
-            title="Press me"
+            title="Créer l'evenement"
             color="#f194ff"
             onPress={() => this.submit()}
           />

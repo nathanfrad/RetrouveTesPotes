@@ -23,7 +23,6 @@ const LONGITUDE_DELTA = LATITUDE_DELTA * ASPECT_RATIO;
 const USER = 'Nathan';
 const RadiusCircle = 100;
 
-
 class Maps extends React.Component {
   constructor(props) {
     super(props);
@@ -45,27 +44,26 @@ class Maps extends React.Component {
           title: 'Arthur',
           coordinate: {
             latitude: 37.76607333,
-            longitude: -122.4405400,
+            longitude: -122.44054,
           },
         },
         {
           title: 'Paul',
           coordinate: {
             latitude: 37.76609333,
-            longitude: -122.4423040,
+            longitude: -122.442304,
           },
         },
         {
           title: 'Jean',
           coordinate: {
             latitude: 37.76606333,
-            longitude: -122.4400500,
+            longitude: -122.44005,
           },
         },
       ],
     };
   }
-
 
   getMapRegion = () => ({
     latitude: this.state.latitude,
@@ -74,28 +72,28 @@ class Maps extends React.Component {
     longitudeDelta: LONGITUDE_DELTA,
   });
 
-
   getDistance = (point1, point2, unit) => {
-
     let lat1 = point1.coordinate.latitude;
     let lon1 = point1.coordinate.longitude * -1;
     let lat2 = point2.coordinate.latitude;
     let lon2 = point2.coordinate.longitude * -1;
 
-    if ((lat1 == lat2) && (lon1 == lon2)) {
+    if (lat1 == lat2 && lon1 == lon2) {
       return 0;
     } else {
-      let radlat1 = Math.PI * lat1 / 180;
-      let radlat2 = Math.PI * lat2 / 180;
+      let radlat1 = (Math.PI * lat1) / 180;
+      let radlat2 = (Math.PI * lat2) / 180;
       let theta = lon1 - lon2;
-      let radtheta = Math.PI * theta / 180;
-      let dist = Math.sin(radlat1) * Math.sin(radlat2) + Math.cos(radlat1) * Math.cos(radlat2) * Math.cos(radtheta);
+      let radtheta = (Math.PI * theta) / 180;
+      let dist =
+        Math.sin(radlat1) * Math.sin(radlat2) +
+        Math.cos(radlat1) * Math.cos(radlat2) * Math.cos(radtheta);
 
       if (dist > 1) {
         dist = 1;
       }
       dist = Math.acos(dist);
-      dist = dist * 180 / Math.PI;
+      dist = (dist * 180) / Math.PI;
       dist = dist * 60 * 1.1515;
       if (unit == 'K') {
         dist = dist * 1.609344;
@@ -139,22 +137,23 @@ class Maps extends React.Component {
       },
     });
 
-    this.setState({
-      averageMarker: {
-        title: 'Average',
-        coordinate: {
-          latitude: averageLatitude,
-          longitude: averageLongitude,
+    this.setState(
+      {
+        averageMarker: {
+          title: 'Average',
+          coordinate: {
+            latitude: averageLatitude,
+            longitude: averageLongitude,
+          },
         },
       },
-    }, () => {
-      this.verifDistance();
-    });
-
+      () => {
+        this.verifDistance();
+      },
+    );
   };
 
   componentDidMount() {
-
     Geolocation.watchPosition(
       positionUser => {
         const {latitude, longitude} = positionUser.coords;
@@ -172,7 +171,6 @@ class Maps extends React.Component {
             },
           ],
         });
-
       },
       error => console.log(error),
       {
@@ -184,67 +182,67 @@ class Maps extends React.Component {
       {distanceFilter: 10},
     );
     this.centerCircle();
-
   }
-
 
   render() {
     return (
       <View style={styles.container}>
         <MapView
-          provider={this.props.provider}
+          provider={PROVIDER_GOOGLE}
           //provider={PROVIDER_GOOGLE}
           style={styles.map}
           region={this.getMapRegion()}
           // initialRegion={this.state.region}
         >
-
           {this.state.markers.map((marker, index) => {
             if (marker.title === USER) {
-              return (<Marker
-                description={marker.title}
-                title={marker.title}
-                pinColor={'green'}
-                key={index}
-                coordinate={marker.coordinate}
-              />);
+              return (
+                <Marker
+                  description={marker.title}
+                  title={marker.title}
+                  pinColor={'green'}
+                  key={index}
+                  coordinate={marker.coordinate}
+                />
+              );
             } else {
-              return (<Marker
-                description={marker.title}
-                title={marker.title}
-                pinColor={'blue'}
-                key={index}
-                coordinate={marker.coordinate}
-              />);
+              return (
+                <Marker
+                  description={marker.title}
+                  title={marker.title}
+                  pinColor={'blue'}
+                  key={index}
+                  coordinate={marker.coordinate}
+                />
+              );
             }
           })}
 
-          {this.state.averageMarker &&
-          <View>
-            <MapView.Circle
-              center={this.state.averageMarker.coordinate}
-              radius={RadiusCircle}
-              strokeColor={'rgba(1, 66, 96, 1)'}
-              strokeWidth={1}
-              fillColor={'rgba(1, 66, 96, 0.2)'}
-            />
-            <Marker
-              title={this.state.averageMarker.title}
-              key={'8'}
-              pinColor={'red'}
-              coordinate={this.state.averageMarker.coordinate}/>
-          </View>
-          }
+          {this.state.averageMarker && (
+            <View>
+              <MapView.Circle
+                center={this.state.averageMarker.coordinate}
+                radius={RadiusCircle}
+                strokeColor={'rgba(1, 66, 96, 1)'}
+                strokeWidth={1}
+                fillColor={'rgba(1, 66, 96, 0.2)'}
+              />
+              <Marker
+                title={this.state.averageMarker.title}
+                key={'8'}
+                pinColor={'red'}
+                coordinate={this.state.averageMarker.coordinate}
+              />
+            </View>
+          )}
 
           {/*<Marker coordinate={this.getMapRegion()}/>*/}
-
         </MapView>
 
         <View style={styles.buttonContainer}>
           <TouchableOpacity
             onPress={() => this.setState({markers: []})}
-            style={styles.bubble}
-          >
+            style={styles.bubble}>
             <Text>Tap to create a marker of random color</Text>
           </TouchableOpacity>
         </View>

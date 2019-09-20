@@ -5,31 +5,35 @@ import ViewMaps from './containers/ViewMaps';
 import AddEvent from './containers/AddEvent/AddEvent';
 import Event from './containers/Event';
 
-const MainNavigator = createStackNavigator({
-
-  Home: {
-    screen: Home, navigationOptions: ({navigation}) => ({
-      title: 'RetrouveTesPotes',
-    }),
+const MainNavigator = createStackNavigator(
+  {
+    Home: {
+      screen: Home,
+      navigationOptions: ({navigation}) => ({
+        title: 'RetrouveTesPotes',
+      }),
+    },
+    ViewMaps: {
+      screen: ViewMaps,
+      navigationOptions: ({navigation}) => ({
+        title: 'Maps',
+      }),
+    },
+    AddEvent: {
+      screen: AddEvent,
+      navigationOptions: ({navigation}) => ({
+        title: 'Créer une soirée',
+      }),
+    },
+    Event: {
+      screen: Event,
+    },
   },
-  ViewMaps: {
-    screen: ViewMaps, navigationOptions: ({navigation}) => ({
-      title: 'Maps',
-    }),
+  {
+    initialRouteName: 'Home',
   },
-  AddEvent: {
-    screen: AddEvent, navigationOptions: ({navigation}) => ({
-      title: 'Créer une soirée',
-    }),
-  },
-  Event: {
-    screen: Event,
-  },
-}, {
-  initialRouteName: 'Home',
-});
+);
 
 const App = createAppContainer(MainNavigator);
 
 export default App;
-

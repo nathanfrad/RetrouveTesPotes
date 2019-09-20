@@ -17,7 +17,7 @@
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
-  [GMSServices provideAPIKey:@"AIzaSyALpUWgnHc6-JWs7l1xalUCC6WDnDqtQxM"];
+  [GMSServices provideAPIKey:@"AIzaSyAzWg15Qq9rgxCLi9yfzGBDE7Dayd8FnzA"];
   if ([FIRApp defaultApp] == nil) {
     [FIRApp configure];
     [FIRDatabase database].persistenceEnabled = YES;

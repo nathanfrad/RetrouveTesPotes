@@ -27,11 +27,11 @@ export default class Home extends React.Component {
     this.state = {
       events: [],
       isConnected: '',
+      owners: [],
     };
   }
 
   componentDidMount() {
-
     let dbRef = database().ref('events');
     dbRef.on('child_added', val => {
       let evenement = val.val();
@@ -42,6 +42,8 @@ export default class Home extends React.Component {
         };
       });
     });
+
+    // connecté ou déconnecté
     database()
       .ref('.info/connected')
       .on('value', connectedSnap => {
@@ -52,17 +54,19 @@ export default class Home extends React.Component {
 
   getAsyncStorage = async () => {
     try {
-      const user = await AsyncStorage.getItem('userId');
-      this.setState({
-        userId: user,
-      });
+      const value = await AsyncStorage.getItem('owners');
+      if (value !== null) {
+        this.setState({
+          owners: JSON.parse(value),
+        });
+      }
     } catch (error) {
       // Error retrieving data
       Alert.alert(error.message);
     }
   };
 
-  renderRow = ({item}) => {
+  renderEvents = ({item}) => {
     return (
       <TouchableOpacity
         onPress={() => {
@@ -71,6 +75,14 @@ export default class Home extends React.Component {
         style={{padding: 10, borderBottomColor: '#ccc', borderBottomWidth: 1}}>
         <Text> {item.titre}</Text>
       </TouchableOpacity>
+    );
+  };
+
+  renderOwners = ({item}) => {
+    return (
+      <Text>
+        {item.name} : {item.id}
+      </Text>
     );
   };
 
@@ -83,23 +95,28 @@ export default class Home extends React.Component {
         ) : (
           <Text style={styles.offline}>Déconnéctée</Text>
         )}
-        <Text>State : {this.state.userId}</Text>
+        <SafeAreaView>
+          <FlatList
+            keyExtractor={item => item.id}
+            data={this.state.owners}
+            renderItem={this.renderOwners}
+          />
+        </SafeAreaView>
         <Button
           title="Go to Maps"
           onPress={() => {
-            navigate('Maps');
+            navigate('ViewMaps');
           }}
         />
-
         <Button
           title="Créer une soirée"
-          onPress={() => navigate('AddEvent', this.state.userId)}
+          onPress={() => navigate('AddEvent', this.state.owners)}
         />
         <SafeAreaView>
           <FlatList
             keyExtractor={item => item.id}
             data={this.state.events}
-            renderItem={this.renderRow}
+            renderItem={this.renderEvents}
           />
         </SafeAreaView>
       </View>

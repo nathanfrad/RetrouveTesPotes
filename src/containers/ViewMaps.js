@@ -20,9 +20,7 @@ import {
 import Maps from '../components/Maps';
 
 const ViewMaps = () => {
-  return (
-    <Maps/>
-  );
+  return <Maps />;
 };
 
 const styles = StyleSheet.create({
