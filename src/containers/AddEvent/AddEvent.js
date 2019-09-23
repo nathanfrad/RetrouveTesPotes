@@ -75,67 +75,58 @@ export default class AddEvent extends React.Component {
   submit() {
     if (this.state.titre !== '' || this.state.participants.length > 1) {
       // ref events
-      let dbRefEvent = database().ref('events/');
-      let dbRefEventPush = dbRefEvent.push();
-      let keyEvents = dbRefEventPush.key;
-      dbRefEvent
-        .child(keyEvents)
+      let eventsPush = database()
+        .ref('events/')
+        .push();
+      let eventsKey = eventsPush.key;
+      eventsPush
         .set({
           titre: this.state.titre,
         })
         .then(() => {
-          // ref Participants
-          let dbRefParticipants = database().ref('participants/');
-
           // on parcours les participant du formulaire
           this.state.participants.map((participant, index) => {
-            let dbRefParticipantsPush;
-            let keyParticipant = 0;
-            if (this.state.ownersArray.length > 0 && index === 0) {
-              // on parcours le tableau owner
-              this.state.ownersArray.map(owner => {
-                // si le nom du premier champ est egale a un des nom du owner
-                if (owner.name === participant) {
-                  keyParticipant = owner.id;
-                }
-              });
-            }
-            if (keyParticipant === 0) {
-              dbRefParticipantsPush = dbRefEvent.push();
-              keyParticipant = dbRefParticipantsPush.key;
-              if (index === 0) {
-                this.setState({
-                  ownersArray: [
-                    ...this.state.ownersArray,
-                    {name: participant, id: keyParticipant},
-                  ],
-                });
-                this.setAsyncStorage();
+            let participantPush = eventsPush
+              .child('participants/')
+              .push();
+            let participantKey = participantPush.key;
+            participantPush.set({
+              pseudo: participant,
+            });
+
+            // let dbRefUserPush;
+            // let keyUser = 0;
+            if (index === 0) {
+              if (this.state.ownersArray.length === 0) {
+                // on créer un nouveau user dans la base
+                let usersKey = database()
+                  .ref('users')
+                  .push();
+
+                //   let updates = {
+                //     [`event_enrolments/${keyEvents}/${keyParticipant}`]: {
+                //       name: participant,
+                //     },
+                //     [`participant_enrolments/${keyParticipant}/${keyEvents}`]: {
+                //       titre: this.state.titre,
+                //     },
+                //   };
+                //   database()
+                //     .ref()
+                //     .update(updates);
+                // });
+                let updates = {
+                  [`events/${eventsKey}/${participantKey}`]: {
+                    pseudo: participant,
+                  },
+                };
+                usersKey.update(updates);
               }
-              dbRefParticipants.child(keyParticipant).set({
-                name: participant,
-              });
             }
-            // ref participant_enrolments
-            // ref event_enrolments
-            let updates = {
-              [`event_enrolments/${keyEvents}/${keyParticipant}`]: {
-                name: participant,
-              },
-              [`participant_enrolments/${keyParticipant}/${keyEvents}`]: {
-                titre: this.state.titre,
-              },
-            };
-            database()
-              .ref()
-              .update(updates);
           });
         });
       this.props.navigation.navigate('Home');
     } else {
-      // this.inputTitre.setNativeProps({
-      //   borderBottomColor: 'red',
-      // });
       Alert.alert('veuillez renseigner un titre');
     }
   }
