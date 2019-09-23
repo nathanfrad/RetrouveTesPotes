@@ -66,16 +66,24 @@ export default class Home extends React.Component {
     }
   };
   remove = item => {
-    let updates = {
-      [`event_enrolments/${item.id}`]: null,
-      [`events/${item.id}`]: null,
-      [`events/${item.id}`]: null,
-    };
-    database()
-      .ref()
-      .update(updates);
+    let dbRef = database().ref('events');
+    dbRef.on('value', function (snapshot) {
+      let tabl = [];
+      snapshot.forEach(function (child) {
+        tabl.push(child);
+      });
+      Alert.alert(tabl);
+    });
 
-    Alert.alert(item.id);
+    // let updates = {
+    //   [`event_enrolments/${item.id}`]: null,
+    //   [`events/${item.id}`]: null,
+    //   [`events/${item.id}`]: null,
+    // };
+    // database()
+    //   .ref()
+    //   .update(updates);
+    //
   };
 
   renderEvents = ({item}) => {
