@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import database from '@react-native-firebase/database';
 import AsyncStorage from '@react-native-community/async-storage';
+import functions from '@react-native-firebase/functions';
 
 export default class AddEvent extends React.Component {
   constructor(props) {
@@ -57,6 +58,18 @@ export default class AddEvent extends React.Component {
   };
 
   // componentDidMount(): void {
+  //
+  //   exports.makeUppercase = functions.database.ref('/messages/{pushId}/original')
+  //     .onCreate((snapshot, context) => {
+  //       // Grab the current value of what was written to the Realtime Database.
+  //       const original = snapshot.val();
+  //       console.log('Uppercasing', context.params.pushId, original);
+  //       const uppercase = original.toUpperCase();
+  //       // You must return a Promise when performing asynchronous tasks inside a Functions such as
+  //       // writing to the Firebase Realtime Database.
+  //       // Setting an "uppercase" sibling in the Realtime Database returns a Promise.
+  //       return snapshot.ref.parent.child('uppercase').set(uppercase);
+  //     });
   // }
 
   submit() {
@@ -91,7 +104,6 @@ export default class AddEvent extends React.Component {
               dbRefParticipantsPush = dbRefEvent.push();
               keyParticipant = dbRefParticipantsPush.key;
               if (index === 0) {
-                Alert.alert('index :' + index);
                 this.setState({
                   ownersArray: [
                     ...this.state.ownersArray,

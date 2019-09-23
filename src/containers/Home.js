@@ -65,16 +65,35 @@ export default class Home extends React.Component {
       Alert.alert(error.message);
     }
   };
+  remove = item => {
+    let updates = {
+      [`event_enrolments/${item.id}`]: null,
+      [`events/${item.id}`]: null,
+      [`events/${item.id}`]: null,
+    };
+    database()
+      .ref()
+      .update(updates);
+
+    Alert.alert(item.id);
+  };
 
   renderEvents = ({item}) => {
     return (
-      <TouchableOpacity
-        onPress={() => {
-          this.props.navigation.navigate('Event', item);
-        }}
-        style={{padding: 10, borderBottomColor: '#ccc', borderBottomWidth: 1}}>
-        <Text> {item.titre}</Text>
-      </TouchableOpacity>
+      <View style={{flexDirection: 'row'}}>
+        <TouchableOpacity
+          onPress={() => {
+            this.props.navigation.navigate('Event', item);
+          }}
+          style={{
+            padding: 10,
+            borderBottomColor: '#ccc',
+            borderBottomWidth: 1,
+          }}>
+          <Text> {item.titre}</Text>
+        </TouchableOpacity>
+        <Button title="Suppr" onPress={() => this.remove(item)}/>
+      </View>
     );
   };
 
