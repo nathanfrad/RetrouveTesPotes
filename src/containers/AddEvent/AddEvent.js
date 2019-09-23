@@ -36,18 +36,6 @@ export default class AddEvent extends React.Component {
     });
   }
 
-  // validate(value) {
-  //   const {titre, description} = this.state;
-  //   this.setState({titre: value});
-  //   if (value === '') {
-  //     this.inputTitre.setNativeProps({
-  //       borderBottomColor: 'red',
-  //     });
-  //   } else {
-  //     Alert.alert('envoie des données a la base');
-  //
-  //   }
-  // }
   setAsyncStorage = async => {
     try {
       AsyncStorage.setItem('owners', JSON.stringify(this.state.ownersArray));
@@ -56,21 +44,6 @@ export default class AddEvent extends React.Component {
       Alert.alert(error.message);
     }
   };
-
-  // componentDidMount(): void {
-  //
-  //   exports.makeUppercase = functions.database.ref('/messages/{pushId}/original')
-  //     .onCreate((snapshot, context) => {
-  //       // Grab the current value of what was written to the Realtime Database.
-  //       const original = snapshot.val();
-  //       console.log('Uppercasing', context.params.pushId, original);
-  //       const uppercase = original.toUpperCase();
-  //       // You must return a Promise when performing asynchronous tasks inside a Functions such as
-  //       // writing to the Firebase Realtime Database.
-  //       // Setting an "uppercase" sibling in the Realtime Database returns a Promise.
-  //       return snapshot.ref.parent.child('uppercase').set(uppercase);
-  //     });
-  // }
 
   submit() {
     if (this.state.titre !== '' || this.state.participants.length > 1) {
@@ -122,6 +95,17 @@ export default class AddEvent extends React.Component {
                 };
                 usersKey.update(updates);
               }
+              this.setState({
+                ownersArray: [
+                  ...this.state.ownersArray,
+                  {
+                    eventsKey: eventsKey,
+                    pseudo: participant,
+                    id: participantKey,
+                  },
+                ],
+              });
+              this.setAsyncStorage();
             }
           });
         });

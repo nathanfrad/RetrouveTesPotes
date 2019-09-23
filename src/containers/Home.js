@@ -27,7 +27,7 @@ export default class Home extends React.Component {
     this.state = {
       events: [],
       isConnected: '',
-      owners: [],
+      ownersArray: [],
     };
   }
 
@@ -49,6 +49,7 @@ export default class Home extends React.Component {
       .on('value', connectedSnap => {
         this.setState({isConnected: connectedSnap.val()});
       });
+
     this.getAsyncStorage();
   }
 
@@ -57,7 +58,7 @@ export default class Home extends React.Component {
       const value = await AsyncStorage.getItem('owners');
       if (value !== null) {
         this.setState({
-          owners: JSON.parse(value),
+          ownersArray: JSON.parse(value),
         });
       }
     } catch (error) {
@@ -66,26 +67,42 @@ export default class Home extends React.Component {
     }
   };
   remove = item => {
-    let dbRef = database().ref('events');
+    let updates = {};
+    let dbRef = database().ref('users');
     dbRef.on('value', function (snapshot) {
-      let tabl = [];
       snapshot.forEach(function (child) {
-        tabl.push(child);
+        Alert.alert(child.val().key);
+        let key = child.val().key;
+        updates[`users/${key}/events/${item.id}`] = null;
       });
-      Alert.alert(tabl);
     });
 
-    // let updates = {
-    //   [`event_enrolments/${item.id}`]: null,
-    //   [`events/${item.id}`]: null,
-    //   [`events/${item.id}`]: null,
-    // };
-    // database()
-    //   .ref()
-    //   .update(updates);
-    //
+    updates[`events/${item.id}`] = null;
+    database()
+      .ref()
+      .update(updates);
+
+    const array = this.state.ownersArray.filter(
+      val => val.eventsKey !== item.id,
+    );
+    this.setState(
+      {
+        ownersArray: array,
+      },
+      () => {
+        this.setAsyncStorage();
+      },
+    );
   };
 
+  setAsyncStorage = async => {
+    try {
+      AsyncStorage.setItem('owners', JSON.stringify(this.state.ownersArray));
+    } catch (error) {
+      // Error retrieving data
+      Alert.alert(error.message);
+    }
+  };
   renderEvents = ({item}) => {
     return (
       <View style={{flexDirection: 'row'}}>
@@ -108,7 +125,7 @@ export default class Home extends React.Component {
   renderOwners = ({item}) => {
     return (
       <Text>
-        {item.name} : {item.id}
+        {item.pseudo} : {item.eventsKey}
       </Text>
     );
   };
@@ -125,7 +142,7 @@ export default class Home extends React.Component {
         <SafeAreaView>
           <FlatList
             keyExtractor={item => item.id}
-            data={this.state.owners}
+            data={this.state.ownersArray}
             renderItem={this.renderOwners}
           />
         </SafeAreaView>
@@ -137,7 +154,7 @@ export default class Home extends React.Component {
         />
         <Button
           title="Créer une soirée"
-          onPress={() => navigate('AddEvent', this.state.owners)}
+          onPress={() => navigate('AddEvent', this.state.ownersArray)}
         />
         <SafeAreaView>
           <FlatList
