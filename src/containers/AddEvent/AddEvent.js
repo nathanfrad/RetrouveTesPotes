@@ -12,7 +12,6 @@ import {
 } from 'react-native';
 import database from '@react-native-firebase/database';
 import AsyncStorage from '@react-native-community/async-storage';
-import functions from '@react-native-firebase/functions';
 
 export default class AddEvent extends React.Component {
   constructor(props) {
@@ -21,8 +20,27 @@ export default class AddEvent extends React.Component {
     this.state = {
       participants: [''],
       ownersArray: this.props.navigation.state.params,
+      userId: '',
     };
   }
+
+  setAsyncStorage = async => {
+    try {
+      AsyncStorage.setItem('owners', JSON.stringify(this.state.ownersArray));
+    } catch (error) {
+      // Error retrieving data
+      Alert.alert(error.message);
+    }
+  };
+
+  componentDidMount = () =>
+    AsyncStorage.getItem('userId').then(value =>
+      this.setState({userId: value}),
+    );
+
+  setUserId = value => {
+    AsyncStorage.setItem('userId', value);
+  };
 
   onFocus() {
     this.inputTitre.setNativeProps({
@@ -36,20 +54,13 @@ export default class AddEvent extends React.Component {
     });
   }
 
-  setAsyncStorageJson = async => {
+  getAsyncStorage = async () => {
     try {
-      AsyncStorage.setItem('owners', JSON.stringify(this.state.ownersArray));
-    } catch (error) {
-      // Error retrieving data
-      Alert.alert(error.message);
-    }
-  };
-
-  getAsyncStorage = async titre => {
-    try {
-      const value = await AsyncStorage.getItem(titre);
+      const value = await AsyncStorage.getItem('userIdKey');
       if (value !== null) {
-        return value;
+        return JSON.parse(value);
+      } else {
+        return 'null';
       }
     } catch (error) {
       // Error retrieving data
@@ -77,46 +88,44 @@ export default class AddEvent extends React.Component {
               pseudo: participant,
             });
 
-            if (index === 0 && this.state.ownersArray.length === 0) {
-              // on créer un nouveau user dans la base
-              let usersKey = database()
-                .ref('users')
-                .push();
-              let updates = {
-                [`events/${eventsKey}/${participantKey}`]: {
-                  pseudo: participant,
-                },
-              };
-              usersKey.update(updates);
-              try {
-                Alert.alert('userId ' + usersKey.key.toString());
-                AsyncStorage.setItem('userId', usersKey.key.toString);
-              } catch (error) {
-                Alert.alert(error.message);
+            if (index === 0) {
+              Alert.alert(this.state.userId);
+              if (this.state.userId === '' || this.state.userId === null) {
+                // on créer un nouveau user dans la base
+                let users = database()
+                  .ref('users')
+                  .push();
+                let updates = {
+                  [`events/${eventsKey}/${participantKey}`]: {
+                    pseudo: participant,
+                  },
+                };
+                users.update(updates);
+                this.setUserId(users.key);
+              } else {
+                const userId = this.state.userId;
+                let updates = {
+                  [`users/${userId}/events/${eventsKey}/${participantKey}`]: {
+                    pseudo: participant,
+                  },
+                };
+                database()
+                  .ref()
+                  .update(updates);
               }
-            } else if (index === 0 && this.state.ownersArray.length > 0) {
-              let usersKey = this.getAsyncStorage('userId');
-              Alert.alert('usersKey ' + usersKey);
-              let updates = {
-                [`users/${usersKey}/events/${eventsKey}/${participantKey}`]: {
-                  pseudo: participant,
-                },
-              };
-              database()
-                .ref()
-                .update(updates);
+              // on stocke les pseudos owner
+              this.setState({
+                ownersArray: [
+                  ...this.state.ownersArray,
+                  {
+                    eventsKey: eventsKey,
+                    pseudo: participant,
+                    id: participantKey,
+                  },
+                ],
+              });
+              this.setAsyncStorage();
             }
-            this.setState({
-              ownersArray: [
-                ...this.state.ownersArray,
-                {
-                  eventsKey: eventsKey,
-                  pseudo: participant,
-                  id: participantKey,
-                },
-              ],
-            });
-            this.setAsyncStorageJson();
           });
         });
       this.props.navigation.navigate('Home');
