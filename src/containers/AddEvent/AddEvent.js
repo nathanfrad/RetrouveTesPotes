@@ -36,9 +36,21 @@ export default class AddEvent extends React.Component {
     });
   }
 
-  setAsyncStorage = async => {
+  setAsyncStorageJson = async => {
     try {
       AsyncStorage.setItem('owners', JSON.stringify(this.state.ownersArray));
+    } catch (error) {
+      // Error retrieving data
+      Alert.alert(error.message);
+    }
+  };
+
+  getAsyncStorage = async titre => {
+    try {
+      const value = await AsyncStorage.getItem(titre);
+      if (value !== null) {
+        return value;
+      }
     } catch (error) {
       // Error retrieving data
       Alert.alert(error.message);
@@ -59,54 +71,52 @@ export default class AddEvent extends React.Component {
         .then(() => {
           // on parcours les participant du formulaire
           this.state.participants.map((participant, index) => {
-            let participantPush = eventsPush
-              .child('participants/')
-              .push();
+            let participantPush = eventsPush.child('participants/').push();
             let participantKey = participantPush.key;
             participantPush.set({
               pseudo: participant,
             });
 
-            // let dbRefUserPush;
-            // let keyUser = 0;
-            if (index === 0) {
-              if (this.state.ownersArray.length === 0) {
-                // on créer un nouveau user dans la base
-                let usersKey = database()
-                  .ref('users')
-                  .push();
-
-                //   let updates = {
-                //     [`event_enrolments/${keyEvents}/${keyParticipant}`]: {
-                //       name: participant,
-                //     },
-                //     [`participant_enrolments/${keyParticipant}/${keyEvents}`]: {
-                //       titre: this.state.titre,
-                //     },
-                //   };
-                //   database()
-                //     .ref()
-                //     .update(updates);
-                // });
-                let updates = {
-                  [`events/${eventsKey}/${participantKey}`]: {
-                    pseudo: participant,
-                  },
-                };
-                usersKey.update(updates);
+            if (index === 0 && this.state.ownersArray.length === 0) {
+              // on créer un nouveau user dans la base
+              let usersKey = database()
+                .ref('users')
+                .push();
+              let updates = {
+                [`events/${eventsKey}/${participantKey}`]: {
+                  pseudo: participant,
+                },
+              };
+              usersKey.update(updates);
+              try {
+                Alert.alert('userId ' + usersKey.key.toString());
+                AsyncStorage.setItem('userId', usersKey.key.toString);
+              } catch (error) {
+                Alert.alert(error.message);
               }
-              this.setState({
-                ownersArray: [
-                  ...this.state.ownersArray,
-                  {
-                    eventsKey: eventsKey,
-                    pseudo: participant,
-                    id: participantKey,
-                  },
-                ],
-              });
-              this.setAsyncStorage();
+            } else if (index === 0 && this.state.ownersArray.length > 0) {
+              let usersKey = this.getAsyncStorage('userId');
+              Alert.alert('usersKey ' + usersKey);
+              let updates = {
+                [`users/${usersKey}/events/${eventsKey}/${participantKey}`]: {
+                  pseudo: participant,
+                },
+              };
+              database()
+                .ref()
+                .update(updates);
             }
+            this.setState({
+              ownersArray: [
+                ...this.state.ownersArray,
+                {
+                  eventsKey: eventsKey,
+                  pseudo: participant,
+                  id: participantKey,
+                },
+              ],
+            });
+            this.setAsyncStorageJson();
           });
         });
       this.props.navigation.navigate('Home');

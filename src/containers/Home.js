@@ -67,20 +67,27 @@ export default class Home extends React.Component {
     }
   };
   remove = item => {
+    // let dbRef = database().ref('events');
+    // dbRef.on('child_added', val => {
+    //   let evenement = val.val();
+    //   evenement.id = val.key;
+    //   this.setState(prevState => {
+    //     return {
+    //       events: [...prevState.events, evenement],
+    //     };
+    //   });
+    // });
     let updates = {};
     let dbRef = database().ref('users');
-    dbRef.on('value', function (snapshot) {
-      snapshot.forEach(function (child) {
-        Alert.alert(child.val().key);
-        let key = child.val().key;
-        updates[`users/${key}/events/${item.id}`] = null;
-      });
+    dbRef.on('child_added', val => {
+      // Alert.alert(`users/${val.key}/events/${item.id}`);
+      // let key = val.key;
+      updates[`users/${val.key}/events/${item.id}`] = null;
+      updates[`events/${item.id}`] = null;
+      database()
+        .ref()
+        .update(updates);
     });
-
-    updates[`events/${item.id}`] = null;
-    database()
-      .ref()
-      .update(updates);
 
     const array = this.state.ownersArray.filter(
       val => val.eventsKey !== item.id,
@@ -93,6 +100,10 @@ export default class Home extends React.Component {
         this.setAsyncStorage();
       },
     );
+  };
+
+  clearAsyncStorage = async => {
+    AsyncStorage.clear();
   };
 
   setAsyncStorage = async => {
@@ -146,6 +157,13 @@ export default class Home extends React.Component {
             renderItem={this.renderOwners}
           />
         </SafeAreaView>
+
+        <Button
+          title="clearAsyncStorage"
+          onPress={() => {
+            this.clearAsyncStorage();
+          }}
+        />
         <Button
           title="Go to Maps"
           onPress={() => {
