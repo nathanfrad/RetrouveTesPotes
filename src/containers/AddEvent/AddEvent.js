@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import database from '@react-native-firebase/database';
 import AsyncStorage from '@react-native-community/async-storage';
+import {addUserWithEvent, addEventToUser} from '../../services/userService';
 
 export default class AddEvent extends React.Component {
   constructor(props) {
@@ -19,6 +20,7 @@ export default class AddEvent extends React.Component {
     const error = [];
     this.state = {
       participants: [''],
+      participantsTemporary: [''],
       ownersArray: this.props.navigation.state.params,
       userId: '',
     };
@@ -38,10 +40,6 @@ export default class AddEvent extends React.Component {
       this.setState({userId: value}),
     );
 
-  setUserId = value => {
-    AsyncStorage.setItem('userId', value);
-  };
-
   onFocus() {
     this.inputTitre.setNativeProps({
       borderBottomColor: 'blue',
@@ -54,73 +52,50 @@ export default class AddEvent extends React.Component {
     });
   }
 
-  getAsyncStorage = async () => {
-    try {
-      const value = await AsyncStorage.getItem('userIdKey');
-      if (value !== null) {
-        return JSON.parse(value);
-      } else {
-        return 'null';
-      }
-    } catch (error) {
-      // Error retrieving data
-      Alert.alert(error.message);
-    }
-  };
-
   submit() {
     if (this.state.titre !== '' || this.state.participants.length > 1) {
       // ref events
       let eventsPush = database()
         .ref('events/')
         .push();
-      let eventsKey = eventsPush.key;
       eventsPush
         .set({
           titre: this.state.titre,
         })
         .then(() => {
           // on parcours les participant du formulaire
-          this.state.participants.map((participant, index) => {
+          this.state.participants.map((pseudoParticipant, index) => {
             let participantPush = eventsPush.child('participants/').push();
-            let participantKey = participantPush.key;
             participantPush.set({
-              pseudo: participant,
+              pseudo: pseudoParticipant,
             });
 
             if (index === 0) {
-              Alert.alert(this.state.userId);
               if (this.state.userId === '' || this.state.userId === null) {
                 // on créer un nouveau user dans la base
-                let users = database()
-                  .ref('users')
-                  .push();
-                let updates = {
-                  [`events/${eventsKey}/${participantKey}`]: {
-                    pseudo: participant,
-                  },
-                };
-                users.update(updates);
-                this.setUserId(users.key);
+                addUserWithEvent(
+                  eventsPush,
+                  participantPush,
+                  pseudoParticipant,
+                );
               } else {
                 const userId = this.state.userId;
-                let updates = {
-                  [`users/${userId}/events/${eventsKey}/${participantKey}`]: {
-                    pseudo: participant,
-                  },
-                };
-                database()
-                  .ref()
-                  .update(updates);
+                // on ajoute l'evenement au owner existant
+                addEventToUser(
+                  userId,
+                  eventsPush,
+                  participantPush,
+                  pseudoParticipant,
+                );
               }
               // on stocke les pseudos owner
               this.setState({
                 ownersArray: [
                   ...this.state.ownersArray,
                   {
-                    eventsKey: eventsKey,
-                    pseudo: participant,
-                    id: participantKey,
+                    eventsKey: eventsPush.key,
+                    pseudo: pseudoParticipant,
+                    id: participantPush.key,
                   },
                 ],
               });
@@ -135,24 +110,28 @@ export default class AddEvent extends React.Component {
   }
 
   addParticipant(value) {
-    if (this.state.participants.length !== 0) {
-      this.setState({user: true});
-    }
-    if (value !== '' && this.state.participants.includes(value)) {
-      this.setState({participants: [...this.state.participants, '']});
-    } else {
+    this.setState({isOwner: this.state.participants.length !== 0});
+    if (value === '') {
+      Alert.alert('Veuillez remplir les champs participants');
+    } else if (this.state.participants.includes(value)) {
       Alert.alert('Ce nom est déja present dans la liste');
+    } else {
+      this.setState({participants: [...this.state.participantsTemporary]});
+      this.setState({
+        participantsTemporary: [...this.state.participantsTemporary, ''],
+      });
     }
   }
 
   removeParticipant(index) {
-    this.state.participants.splice(index, 1);
-    this.setState({participants: this.state.participants});
+    this.setState({isOwner: this.state.participantsTemporary.length > 1});
+    this.state.participantsTemporary.splice(index, 1);
+    Alert.alert(this.state.participantsTemporary);
   }
 
   handleChange(value, index) {
-    this.state.participants[index] = value.trim();
-    this.setState({participants: this.state.participants});
+    this.state.participantsTemporary[index] = value.trim();
+    this.setState({participantsTemporary: this.state.participantsTemporary});
   }
 
   render() {
@@ -190,7 +169,7 @@ export default class AddEvent extends React.Component {
           </View>
           <View style={styles.containerLabelInput}>
             <Text numberOfLines={1}>Participants</Text>
-            {this.state.participants.map((name, index) => {
+            {this.state.participantsTemporary.map((name, index) => {
               return (
                 <View key={index} style={{flexDirection: 'row'}}>
                   <View style={{width: '80%'}}>
@@ -200,12 +179,12 @@ export default class AddEvent extends React.Component {
                       value={name}
                       autoCompleteType={'name'}
                       placeholder={
-                        this.state.user ? 'Autre participant' : 'Votre nom'
+                        this.state.isOwner ? 'Autre participant' : 'Votre nom'
                       }
                     />
                   </View>
 
-                  {this.state.participants.length - 1 === index ? (
+                  {this.state.participantsTemporary.length - 1 === index ? (
                     <Button
                       title="Add"
                       color="green"

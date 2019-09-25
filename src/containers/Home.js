@@ -20,6 +20,7 @@ import {
 } from 'react-native';
 import {padding} from '../styles/base';
 import AsyncStorage from '@react-native-community/async-storage';
+import {deleteEvent} from '../services/eventService';
 
 export default class Home extends React.Component {
   constructor(props) {
@@ -67,27 +68,7 @@ export default class Home extends React.Component {
     }
   };
   remove = item => {
-    // let dbRef = database().ref('events');
-    // dbRef.on('child_added', val => {
-    //   let evenement = val.val();
-    //   evenement.id = val.key;
-    //   this.setState(prevState => {
-    //     return {
-    //       events: [...prevState.events, evenement],
-    //     };
-    //   });
-    // });
-    let updates = {};
-    let dbRef = database().ref('users');
-    dbRef.on('child_added', val => {
-      // Alert.alert(`users/${val.key}/events/${item.id}`);
-      // let key = val.key;
-      updates[`users/${val.key}/events/${item.id}`] = null;
-      updates[`events/${item.id}`] = null;
-      database()
-        .ref()
-        .update(updates);
-    });
+    deleteEvent(item);
 
     const array = this.state.ownersArray.filter(
       val => val.eventsKey !== item.id,
@@ -110,10 +91,10 @@ export default class Home extends React.Component {
     try {
       AsyncStorage.setItem('owners', JSON.stringify(this.state.ownersArray));
     } catch (error) {
-      // Error retrieving data
       Alert.alert(error.message);
     }
   };
+
   renderEvents = ({item}) => {
     return (
       <View style={{flexDirection: 'row'}}>
