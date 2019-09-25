@@ -13,6 +13,7 @@ import {
 import database from '@react-native-firebase/database';
 import AsyncStorage from '@react-native-community/async-storage';
 import {addUserWithEvent, addEventToUser} from '../../services/userService';
+import {fontSize} from '../../styles/base';
 
 export default class AddEvent extends React.Component {
   static navigationOptions = {
@@ -150,14 +151,17 @@ export default class AddEvent extends React.Component {
   render() {
     const {navigate} = this.props.navigation;
     return (
-      <View style={styles.container}>
+      <View style={styles.globalContainer}>
         <Text>State : {this.state.userId}</Text>
         <ScrollView>
           <View style={styles.containerLabelInput}>
-            <Text numberOfLines={1}>Titre</Text>
+            <Text style={styles.titreClair} numberOfLines={1}>
+              L'excuse de la soirée ?{' '}
+            </Text>
             <TextInput
               ref={r => (this.inputTitre = r)}
               style={styles.textinput}
+              placeholder={'Titre'}
               onChangeText={value => this.setState({titre: value})}
               value={this.state.titre}
               // value={value}
@@ -169,10 +173,13 @@ export default class AddEvent extends React.Component {
             />
           </View>
           <View style={styles.containerLabelInput}>
-            <Text numberOfLines={1}>Description</Text>
+            <Text style={styles.titreClair} numberOfLines={1}>
+              Description
+            </Text>
             <TextInput
               ref={'inputDescription'}
               style={[styles.textinput, this.state.inputDescription]}
+              placeholder={'Pas d\'abus, que de l\'excés !'}
               onChangeText={text => this.setState({description: text})}
               value={this.state.description}
               onSubmitEditing={event => {
@@ -181,7 +188,9 @@ export default class AddEvent extends React.Component {
             />
           </View>
           <View style={styles.containerLabelInput}>
-            <Text numberOfLines={1}>Participants</Text>
+            <Text style={styles.titreClair} numberOfLines={1}>
+              Participants
+            </Text>
             {this.state.participantsTemporary.map((name, index) => {
               return (
                 <View key={index} style={{flexDirection: 'row'}}>
@@ -216,7 +225,7 @@ export default class AddEvent extends React.Component {
           </View>
           <Button
             title="Créer l'evenement"
-            color="#f194ff"
+            color={colors.deepLemon}
             onPress={() => this.submit()}
           />
         </ScrollView>
@@ -226,11 +235,19 @@ export default class AddEvent extends React.Component {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    ...StyleSheet.absoluteFillObject,
-    display: 'flex',
-    // alignItems: 'center',
+  globalContainer: {
+    flexDirection: 'column',
     padding: padding.md,
+    backgroundColor: colors.primary,
+    color: colors.platinum,
+    minWidth: '100%',
+    minHeight: '100%',
+    justifyContent: 'flex-start',
+    fontSize: 40,
+  },
+  titreClair: {
+    color: colors.platinum,
+    fontSize: fontSize.sousTitre,
   },
   map: {
     ...StyleSheet.absoluteFillObject,
@@ -259,8 +276,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
     paddingHorizontal: 6,
     height: 40,
-    borderColor: 'gray',
-    borderBottomColor: '#47315a',
+    borderBottomColor: colors.grey,
     borderBottomWidth: 1,
   },
 });
