@@ -18,10 +18,26 @@ import {
 } from 'react-native';
 
 import Maps from '../components/Maps';
+import {colors} from '../styles/base';
+import database from '@react-native-firebase/database';
 
-const ViewMaps = () => {
-  return <Maps />;
-};
+export default class ViewMaps extends React.Component {
+  static navigationOptions = {
+    headerStyle: {
+      backgroundColor: colors.primary,
+      borderBottomWidth: 0,
+    },
+    headerTintColor: colors.deepLemon,
+    headerTitleStyle: {
+      fontWeight: 'bold',
+    },
+  };
+
+  render() {
+    const {navigate} = this.props.navigation;
+    return <Maps />;
+  }
+}
 
 const styles = StyleSheet.create({
   container: {
@@ -35,5 +51,3 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFillObject,
   },
 });
-
-export default ViewMaps;

@@ -18,42 +18,34 @@ import {
   Alert,
   StyleSheet,
 } from 'react-native';
-import {padding} from '../styles/base';
+import {padding, colors, BORDER_RADIUS, fontSize} from '../styles/base';
 import AsyncStorage from '@react-native-community/async-storage';
 import {deleteEvent} from '../services/eventService';
 
-export default class Home extends React.Component {
+export default class HomeSave extends React.Component {
+  static navigationOptions = {
+    title: 'Home',
+    headerStyle: {
+      backgroundColor: colors.primary,
+      borderBottomWidth: 0,
+    },
+
+    headerTintColor: '#fff',
+    headerTitleStyle: {
+      fontWeight: 'bold',
+    },
+  };
+
   constructor(props) {
     super(props);
     this.state = {
-      events: [],
-      isConnected: '',
       ownersArray: [],
     };
   }
 
   componentDidMount() {
-    let dbRef = database().ref('events');
-    dbRef.on('child_added', val => {
-      let evenement = val.val();
-      evenement.id = val.key;
-      this.setState(prevState => {
-        return {
-          events: [...prevState.events, evenement],
-        };
-      });
-    });
-
-    // connecté ou déconnecté
-    database()
-      .ref('.info/connected')
-      .on('value', connectedSnap => {
-        this.setState({isConnected: connectedSnap.val()});
-      });
-
     this.getAsyncStorage();
   }
-
   getAsyncStorage = async () => {
     try {
       const value = await AsyncStorage.getItem('owners');
@@ -67,143 +59,130 @@ export default class Home extends React.Component {
       Alert.alert(error.message);
     }
   };
-  remove = item => {
-    deleteEvent(item);
-
-    const array = this.state.ownersArray.filter(
-      val => val.eventsKey !== item.id,
-    );
-    this.setState(
-      {
-        ownersArray: array,
-      },
-      () => {
-        this.setAsyncStorage();
-      },
-    );
-  };
-
-  clearAsyncStorage = async => {
-    AsyncStorage.clear();
-  };
-
-  setAsyncStorage = async => {
-    try {
-      AsyncStorage.setItem('owners', JSON.stringify(this.state.ownersArray));
-    } catch (error) {
-      Alert.alert(error.message);
-    }
-  };
-
-  renderEvents = ({item}) => {
-    return (
-      <View style={{flexDirection: 'row'}}>
-        <TouchableOpacity
-          onPress={() => {
-            this.props.navigation.navigate('Event', item);
-          }}
-          style={{
-            padding: 10,
-            borderBottomColor: '#ccc',
-            borderBottomWidth: 1,
-          }}>
-          <Text> {item.titre}</Text>
-        </TouchableOpacity>
-        <Button title="Suppr" onPress={() => this.remove(item)}/>
-      </View>
-    );
-  };
-
-  renderOwners = ({item}) => {
-    return (
-      <Text>
-        {item.pseudo} : {item.eventsKey}
-      </Text>
-    );
-  };
 
   render() {
     const {navigate} = this.props.navigation;
     return (
-      <View>
-        {this.state.isConnected ? (
-          <Text style={styles.connected}>Connécté</Text>
-        ) : (
-          <Text style={styles.offline}>Déconnéctée</Text>
-        )}
-        <SafeAreaView>
-          <FlatList
-            keyExtractor={item => item.id}
-            data={this.state.ownersArray}
-            renderItem={this.renderOwners}
-          />
-        </SafeAreaView>
+      <View style={styles.globalContainer}>
+        <View>
+          <Text style={styles.welcome}>Retrouve Tes Potes</Text>
+        </View>
 
-        <Button
-          title="clearAsyncStorage"
-          onPress={() => {
-            this.clearAsyncStorage();
-          }}
-        />
-        <Button
-          title="Go to Maps"
+        <TouchableOpacity
+          style={styles.bulleLemon}
           onPress={() => {
             navigate('ViewMaps');
-          }}
-        />
-        <Button
-          title="Créer une soirée"
-          onPress={() => navigate('AddEvent', this.state.ownersArray)}
-        />
-        <SafeAreaView>
-          <FlatList
-            keyExtractor={item => item.id}
-            data={this.state.events}
-            renderItem={this.renderEvents}
-          />
-        </SafeAreaView>
+          }}>
+          <Text style={styles.titreSombre}>Soirée en cours</Text>
+          <Text style={styles.paragrapheSombre}>Anniversaire de Paul </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.bulleGrey}
+          onPress={() => navigate('AddEvent', this.state.ownersArray)}>
+          <Text style={styles.paragrapheClair}>Une nouvelle excuse pour faire soirée ?</Text>
+          <Text style={styles.titreClair}>Créer une soirée</Text>
+        </TouchableOpacity>
+        <View style={styles.bulleGrey}>
+          <Text style={styles.titreClair}>Rejoindre une soirée </Text>
+        </View>
+
+        <View style={styles.bulleSecours}>
+          <Text style={styles.titreClair}>
+            Deviens le herosd e la soirée ! Regarde les premiers gestes de
+            secours
+          </Text>
+        </View>
+
+        <View style={styles.bulleContour}>
+          <Text style={styles.titreClair}>Statistique des soirée</Text>
+          <Text style={styles.paragrapheClair}>Level 7 : Pilier de bar </Text>
+        </View>
       </View>
     );
   }
 }
 
 const styles = StyleSheet.create({
-  connected: {
-    alignItems: 'center',
+  globalContainer: {
+    flexDirection: 'column',
     padding: padding.md,
-    backgroundColor: 'green',
+    backgroundColor: colors.primary,
+    color: colors.platinum,
+    minWidth: '100%',
+    minHeight: '100%',
+    justifyContent: 'flex-start',
+    fontSize: 40,
   },
-  offline: {
-    alignItems: 'center',
+  welcome: {
+    color: colors.platinum,
+    fontSize: fontSize.welcome,
+    marginVertical: padding.lg,
+    fontWeight: 'bold',
+    // fontFamily: 'AmericanTypewriter-Light'
+    fontFamily: 'MarkerFelt-Thin',
+  },
+  bulleBlue: {
+    flexDirection: 'column',
     padding: padding.md,
-    backgroundColor: 'red',
+    backgroundColor: colors.royalBlue,
+    color: colors.platinum,
+    borderRadius: BORDER_RADIUS,
+    marginVertical: padding.md,
   },
-  bubble: {
-    backgroundColor: 'rgba(255,255,255,0.7)',
-    paddingHorizontal: 18,
-    paddingVertical: 12,
-    borderRadius: 20,
+  bulleLemon: {
+    flexDirection: 'column',
+    padding: padding.md,
+    backgroundColor: colors.deepLemon,
+    color: colors.primary,
+    borderRadius: BORDER_RADIUS,
+    marginVertical: padding.md,
   },
-  latlng: {
-    width: 200,
-    alignItems: 'stretch',
+  bulleGrey: {
+    flexDirection: 'column',
+    padding: padding.md,
+    backgroundColor: colors.secondary,
+    color: colors.platinum,
+    borderRadius: BORDER_RADIUS,
+    marginVertical: padding.sm,
   },
-  button: {
-    width: 80,
-    paddingHorizontal: 12,
-    alignItems: 'center',
-    marginHorizontal: 10,
+
+  bulleContour: {
+    flexDirection: 'column',
+    padding: padding.md,
+    color: colors.platinum,
+    borderRadius: BORDER_RADIUS,
+    marginVertical: padding.sm,
+    borderColor: colors.deepLemon,
+    borderWidth: 1,
   },
-  containerLabelInput: {
-    marginVertical: 10,
+
+  bulleSecours: {
+    flexDirection: 'column',
+    padding: padding.lg,
+    color: colors.royalBlue,
+    borderRadius: BORDER_RADIUS,
+    marginVertical: padding.sm,
   },
-  textinput: {
+  containerRow: {
     flexDirection: 'row',
-    backgroundColor: 'transparent',
-    paddingHorizontal: 6,
-    height: 40,
-    borderColor: 'gray',
-    borderBottomColor: '#47315a',
-    borderBottomWidth: 1,
+    justifyContent: 'space-between',
+  },
+  titreSombre: {
+    color: colors.primary,
+    fontSize: fontSize.titre,
+  },
+  titreClair: {
+    color: colors.platinum,
+    fontSize: fontSize.titre,
+  },
+  paragrapheSombre: {
+    color: colors.secondary,
+    fontSize: fontSize.label,
+  },
+
+  paragrapheClair: {
+    color: colors.grey,
+    fontSize: fontSize.sousTitre,
   },
 });

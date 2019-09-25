@@ -10,13 +10,14 @@ const MainNavigator = createStackNavigator(
     Home: {
       screen: Home,
       navigationOptions: ({navigation}) => ({
-        title: 'RetrouveTesPotes',
+        title: '',
       }),
     },
     ViewMaps: {
       screen: ViewMaps,
       navigationOptions: ({navigation}) => ({
         title: 'Maps',
+        headerBackTitle: null,
       }),
     },
     AddEvent: {

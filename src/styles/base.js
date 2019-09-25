@@ -1,23 +1,36 @@
 import {StyleSheet, Dimensions} from 'react-native';
 
+export const FONT_NORMAL = 'OpenSans-Regular';
+export const FONT_BOLD = 'OpenSans-Bold';
+export const BORDER_RADIUS = 5;
+
 export const dimensions = {
   fullHeight: Dimensions.get('window').height,
   fullWidth: Dimensions.get('window').width,
 };
 
 export const colors = {
-  primary: '#226B74',
-  secondary: '#254B5A',
-  tertiary: '#5DA6A7',
+  primary: '#1b1a20',
+  secondary: '#343338',
+  royalBlue: '#6981EC',
+  deepLemon: '#FCC117',
+  platinum: '#EDEDF1',
+  grey: '#78767b',
 };
 
 export const padding = {
   sm: 10,
-  md: 20,
-  lg: 30,
-  xl: 40,
+  md: 15,
+  lg: 20,
+  xl: 30,
 };
-
+export const fontSize = {
+  welcome: 28,
+  titre: 23,
+  sousTitre: 18,
+  label: 15,
+  paragraphe: 12,
+};
 export const fonts = {
   sm: 12,
   md: 18,

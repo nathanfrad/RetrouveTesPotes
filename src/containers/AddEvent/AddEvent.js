@@ -15,6 +15,19 @@ import AsyncStorage from '@react-native-community/async-storage';
 import {addUserWithEvent, addEventToUser} from '../../services/userService';
 
 export default class AddEvent extends React.Component {
+  static navigationOptions = {
+    title: 'Home',
+    headerStyle: {
+      backgroundColor: colors.primary,
+      borderBottomWidth: 0,
+    },
+
+    headerTintColor: '#fff',
+    headerTitleStyle: {
+      fontWeight: 'bold',
+    },
+  };
+
   constructor(props) {
     super(props);
     const error = [];
