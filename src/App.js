@@ -23,7 +23,7 @@ const MainNavigator = createStackNavigator(
     AddEvent: {
       screen: AddEvent,
       navigationOptions: ({navigation}) => ({
-        title: 'Créer une soirée',
+        title: '',
       }),
     },
     Event: {
@@ -31,7 +31,7 @@ const MainNavigator = createStackNavigator(
     },
   },
   {
-    initialRouteName: 'Home',
+    initialRouteName: 'AddEvent',
   },
 );
 

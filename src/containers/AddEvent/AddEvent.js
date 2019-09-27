@@ -9,11 +9,12 @@ import {
   StyleSheet,
   Button,
   Alert,
+  TouchableOpacity,
 } from 'react-native';
 import database from '@react-native-firebase/database';
 import AsyncStorage from '@react-native-community/async-storage';
 import {addUserWithEvent, addEventToUser} from '../../services/userService';
-import {fontSize} from '../../styles/base';
+import {fontSize, radius} from '../../styles/base';
 
 export default class AddEvent extends React.Component {
   static navigationOptions = {
@@ -22,7 +23,6 @@ export default class AddEvent extends React.Component {
       backgroundColor: colors.primary,
       borderBottomWidth: 0,
     },
-
     headerTintColor: '#fff',
     headerTitleStyle: {
       fontWeight: 'bold',
@@ -33,7 +33,7 @@ export default class AddEvent extends React.Component {
     super(props);
     const error = [];
     this.state = {
-      participants: [''],
+      participants: [],
       participantsTemporary: [''],
       ownersArray: this.props.navigation.state.params,
       userId: '',
@@ -49,22 +49,11 @@ export default class AddEvent extends React.Component {
     }
   };
 
-  componentDidMount = () =>
+  componentDidMount = () => {
     AsyncStorage.getItem('userId').then(value =>
       this.setState({userId: value}),
     );
-
-  onFocus() {
-    this.inputTitre.setNativeProps({
-      borderBottomColor: 'blue',
-    });
-  }
-
-  onBlur() {
-    this.inputTitre.setNativeProps({
-      borderBottomColor: 'black',
-    });
-  }
+  };
 
   submit() {
     if (this.state.titre !== '' || this.state.participants.length > 1) {
@@ -124,13 +113,14 @@ export default class AddEvent extends React.Component {
   }
 
   addParticipant(value) {
-    this.setState({isOwner: this.state.participants.length !== 0});
     if (value === '') {
       Alert.alert('Veuillez remplir les champs participants');
     } else if (this.state.participants.includes(value)) {
       Alert.alert('Ce nom est déja present dans la liste');
     } else {
-      this.setState({participants: [...this.state.participantsTemporary]});
+      this.setState({participants: this.state.participantsTemporary.filter(Boolean)}, () => {
+        this.setState({isOwner: this.state.participants.length > 0});
+      });
       this.setState({
         participantsTemporary: [...this.state.participantsTemporary, ''],
       });
@@ -138,9 +128,13 @@ export default class AddEvent extends React.Component {
   }
 
   removeParticipant(index) {
-    this.setState({isOwner: this.state.participantsTemporary.length > 1});
     this.state.participantsTemporary.splice(index, 1);
-    Alert.alert(this.state.participantsTemporary);
+    this.setState(
+      {participants: this.state.participantsTemporary.filter(Boolean)},
+      () => {
+        this.setState({isOwner: this.state.participants.length > 0});
+      },
+    );
   }
 
   handleChange(value, index) {
@@ -148,19 +142,31 @@ export default class AddEvent extends React.Component {
     this.setState({participantsTemporary: this.state.participantsTemporary});
   }
 
+  onFocus(value) {
+    this.setState({
+      [value]: colors.deepLemon,
+    });
+  }
+
+  onBlur() {
+    this.ref.setNativeProps({
+      borderBottomColor: colors.grey,
+    });
+  }
+
   render() {
     const {navigate} = this.props.navigation;
     return (
       <View style={styles.globalContainer}>
-        <Text>State : {this.state.userId}</Text>
-        <ScrollView>
+        {/*<Text>State : {this.state.userId}</Text>*/}
+
+        <View style={styles.blockSombre}>
           <View style={styles.containerLabelInput}>
             <Text style={styles.titreClair} numberOfLines={1}>
               L'excuse de la soirée ?{' '}
             </Text>
             <TextInput
-              ref={r => (this.inputTitre = r)}
-              style={styles.textinput}
+              style={styles.textInput}
               placeholder={'Titre'}
               onChangeText={value => this.setState({titre: value})}
               value={this.state.titre}
@@ -168,8 +174,10 @@ export default class AddEvent extends React.Component {
               onSubmitEditing={() => {
                 this.refs.inputDescription.focus();
               }}
+              placeholderTextColor={colors.grey}
               onBlur={() => this.onBlur()}
-              onFocus={() => this.onFocus()}
+              onFocus={() => this.onFocus('titreUnderline')}
+              maxLength={30}
             />
           </View>
           <View style={styles.containerLabelInput}>
@@ -178,57 +186,66 @@ export default class AddEvent extends React.Component {
             </Text>
             <TextInput
               ref={'inputDescription'}
-              style={[styles.textinput, this.state.inputDescription]}
+              style={[styles.textInput, this.state.inputDescription]}
               placeholder={'Pas d\'abus, que de l\'excés !'}
               onChangeText={text => this.setState({description: text})}
               value={this.state.description}
               onSubmitEditing={event => {
                 this.refs.Description.focus();
               }}
+              placeholderTextColor={colors.grey}
+              onBlur={() => this.onBlur()}
+              onFocus={() => this.onFocus(this.ref)}
+              maxLength={150}
+              multiline={true}
             />
           </View>
+        </View>
+        <ScrollView style={styles.scrollView}>
           <View style={styles.containerLabelInput}>
             <Text style={styles.titreClair} numberOfLines={1}>
               Participants
             </Text>
             {this.state.participantsTemporary.map((name, index) => {
               return (
-                <View key={index} style={{flexDirection: 'row'}}>
-                  <View style={{width: '80%'}}>
+                <View style={styles.containerInputParticipant} key={index}>
+                  <View style={styles.containInputPart}>
                     <TextInput
-                      style={[styles.textinput, this.state.style]}
+                      style={[styles.inputParticipant, this.state.style]}
                       onChangeText={value => this.handleChange(value, index)}
                       value={name}
                       autoCompleteType={'name'}
+                      placeholderTextColor={colors.grey}
+                      max
                       placeholder={
                         this.state.isOwner ? 'Autre participant' : 'Votre nom'
                       }
+                      maxLength={20}
                     />
                   </View>
-
                   {this.state.participantsTemporary.length - 1 === index ? (
-                    <Button
-                      title="Add"
-                      color="green"
-                      onPress={() => this.addParticipant(name)}
-                    />
+                    <TouchableOpacity
+                      style={styles.addparticipant}
+                      onPress={() => this.addParticipant(name)}>
+                      <Text style={styles.titreSombre}>+</Text>
+                    </TouchableOpacity>
                   ) : (
-                    <Button
-                      title="Suprr"
-                      color="red"
-                      onPress={() => this.removeParticipant(index)}
-                    />
+                    <TouchableOpacity
+                      style={styles.removeparticipant}
+                      onPress={() => this.removeParticipant(index)}>
+                      <Text style={{color: colors.deepLemon}}>X</Text>
+                    </TouchableOpacity>
                   )}
                 </View>
               );
             })}
           </View>
-          <Button
-            title="Créer l'evenement"
-            color={colors.deepLemon}
-            onPress={() => this.submit()}
-          />
         </ScrollView>
+        <TouchableOpacity
+          style={styles.btnValider}
+          onPress={() => this.submit()}>
+          <Text style={styles.titreSombre}>ça va etre la débandade</Text>
+        </TouchableOpacity>
       </View>
     );
   }
@@ -237,46 +254,100 @@ export default class AddEvent extends React.Component {
 const styles = StyleSheet.create({
   globalContainer: {
     flexDirection: 'column',
-    padding: padding.md,
-    backgroundColor: colors.primary,
+    backgroundColor: colors.secondary,
     color: colors.platinum,
     minWidth: '100%',
     minHeight: '100%',
     justifyContent: 'flex-start',
-    fontSize: 40,
+    overflow: 'hidden',
+  },
+  scrollView: {
+    flex: 1,
+    marginBottom: 50,
+  },
+  blockSombre: {
+    color: colors.platinum,
+    backgroundColor: colors.primary,
+  },
+  btnValider: {
+    position: 'absolute',
+    bottom: 0,
+    width: '100%',
+    color: colors.primary,
+    backgroundColor: colors.deepLemon,
+    padding: padding.md,
+    borderTopLeftRadius: radius.sm,
+    borderBottomLeftRadius: radius.sm,
+    fontSize: fontSize.sousTitre,
+    marginLeft: padding.xxxl,
+    marginVertical: padding.xl,
   },
   titreClair: {
     color: colors.platinum,
     fontSize: fontSize.sousTitre,
   },
-  map: {
-    ...StyleSheet.absoluteFillObject,
+  containerInputParticipant: {
+    flexDirection: 'row',
+    backgroundColor: colors.deepLemon,
+    color: colors.platinum,
+    borderRadius: radius.xl,
+    marginVertical: padding.sm,
+  },
+  containInputPart: {
+    backgroundColor: colors.primary,
+    paddingVertical: padding.sm,
+    paddingHorizontal: padding.lg,
+    paddingTop: 2,
+    borderRadius: radius.xl,
+    borderBottomRightRadius: 90,
+    borderTopRightRadius: 0,
+    flex: 9,
+  },
+  inputParticipant: {
+    paddingVertical: padding.sm,
+    borderBottomWidth: 1,
+    borderColor: colors.grey,
+    backgroundColor: colors.primary,
+    color: colors.platinum,
+  },
+  addparticipant: {
+    padding: padding.md,
+    backgroundColor: colors.deepLemon,
+    color: colors.platinum,
+    borderRadius: radius.xl,
+    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'center',
+  },
+  removeparticipant: {
+    padding: padding.md,
+    backgroundColor: colors.primary,
+    color: colors.platinum,
+    borderColor: colors.deepLemon,
+    borderWidth: 2,
+    borderRadius: radius.xl,
+    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    borderTopLeftRadius: 160,
+    borderTopRightRadius: 90,
+    borderBottomRightRadius: 90,
   },
   bubble: {
     backgroundColor: 'rgba(255,255,255,0.7)',
     paddingHorizontal: 18,
     paddingVertical: 12,
-    borderRadius: 20,
-  },
-  latlng: {
-    width: 200,
-    alignItems: 'stretch',
-  },
-  button: {
-    width: 80,
-    paddingHorizontal: 12,
-    alignItems: 'center',
-    marginHorizontal: 10,
   },
   containerLabelInput: {
-    marginVertical: 10,
+    flexDirection: 'column',
+    padding: padding.lg,
   },
-  textinput: {
-    flexDirection: 'row',
-    backgroundColor: 'transparent',
-    paddingHorizontal: 6,
-    height: 40,
-    borderBottomColor: colors.grey,
+  textInput: {
     borderBottomWidth: 1,
+    borderColor: colors.grey,
+    backgroundColor: colors.primary,
+    color: colors.platinum,
+    marginVertical: padding.sm,
+    paddingVertical: padding.sm,
   },
 });

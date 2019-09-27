@@ -9,6 +9,15 @@ export const dimensions = {
   fullWidth: Dimensions.get('window').width,
 };
 
+export const radius = {
+  sm: 5,
+  md: 10,
+  lg: 15,
+  xl: 25,
+
+};
+
+
 export const colors = {
   primary: '#1b1a20',
   secondary: '#343338',
@@ -23,6 +32,8 @@ export const padding = {
   md: 15,
   lg: 20,
   xl: 30,
+  xxl: 50,
+  xxxl: 80,
 };
 export const fontSize = {
   welcome: 28,

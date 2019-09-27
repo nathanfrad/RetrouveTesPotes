@@ -18,7 +18,7 @@ import {
   Alert,
   StyleSheet,
 } from 'react-native';
-import {padding, colors, BORDER_RADIUS, fontSize} from '../styles/base';
+import {padding, colors, fontSize, radius} from '../styles/base';
 import AsyncStorage from '@react-native-community/async-storage';
 import {deleteEvent} from '../services/eventService';
 
@@ -46,6 +46,7 @@ export default class HomeSave extends React.Component {
   componentDidMount() {
     this.getAsyncStorage();
   }
+
   getAsyncStorage = async () => {
     try {
       const value = await AsyncStorage.getItem('owners');
@@ -111,13 +112,13 @@ const styles = StyleSheet.create({
     color: colors.platinum,
     minWidth: '100%',
     minHeight: '100%',
-    justifyContent: 'flex-start',
+    justifyContent: 'space-evenly',
     fontSize: 40,
   },
   welcome: {
     color: colors.platinum,
     fontSize: fontSize.welcome,
-    marginVertical: padding.lg,
+    marginVertical: padding.sm,
     fontWeight: 'bold',
     // fontFamily: 'AmericanTypewriter-Light'
     fontFamily: 'MarkerFelt-Thin',
@@ -127,23 +128,23 @@ const styles = StyleSheet.create({
     padding: padding.md,
     backgroundColor: colors.royalBlue,
     color: colors.platinum,
-    borderRadius: BORDER_RADIUS,
-    marginVertical: padding.md,
+    borderRadius: radius.sm,
+    marginVertical: padding.sm,
   },
   bulleLemon: {
     flexDirection: 'column',
     padding: padding.md,
     backgroundColor: colors.deepLemon,
     color: colors.primary,
-    borderRadius: BORDER_RADIUS,
-    marginVertical: padding.md,
+    borderRadius: radius.sm,
+    marginVertical: padding.sm,
   },
   bulleGrey: {
     flexDirection: 'column',
     padding: padding.md,
     backgroundColor: colors.secondary,
     color: colors.platinum,
-    borderRadius: BORDER_RADIUS,
+    borderRadius: radius.sm,
     marginVertical: padding.sm,
   },
 
@@ -151,7 +152,7 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     padding: padding.md,
     color: colors.platinum,
-    borderRadius: BORDER_RADIUS,
+    borderRadius: radius.sm,
     marginVertical: padding.sm,
     borderColor: colors.deepLemon,
     borderWidth: 1,
@@ -161,7 +162,7 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     padding: padding.lg,
     color: colors.royalBlue,
-    borderRadius: BORDER_RADIUS,
+    borderRadius: radius.sm,
     marginVertical: padding.sm,
   },
   containerRow: {
