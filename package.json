@@ -14,10 +14,12 @@
     "@react-native-firebase/database": "^0.5.2",
     "@react-native-firebase/functions": "^0.5.2",
     "firebase": "^6.6.0",
+    "moment": "^2.24.0",
     "react": "16.8.6",
     "react-native": "0.60.5",
     "react-native-gesture-handler": "^1.4.1",
     "react-native-maps": "github:react-community/react-native-maps",
+    "react-native-modal-datetime-picker": "^7.6.0",
     "react-navigation": "^4.0.0",
     "react-navigation-stack": "^1.5.1"
   },

@@ -16,6 +16,8 @@ import database from '@react-native-firebase/database';
 import AsyncStorage from '@react-native-community/async-storage';
 import {addUserWithEvent, addEventToUser} from '../../services/userService';
 import {fontSize, radius} from '../../styles/base';
+import DateTimePickerComp from '../../components/DateTimePickerComp';
+import moment from 'moment';
 
 export default class AddEvent extends React.Component {
   static navigationOptions = {
@@ -38,6 +40,7 @@ export default class AddEvent extends React.Component {
       participantsTemporary: [''],
       ownersArray: this.props.navigation.state.params,
       userId: '',
+      date: moment(Date(new Date())).format('DD-MM-YYYY'), //Current Date,
     };
   }
 
@@ -193,6 +196,13 @@ export default class AddEvent extends React.Component {
     );
   };
 
+  myCallback = (dataFromChild) => {
+    if (dataFromChild !== null) {
+      this.setState({
+        date: dataFromChild,
+      });
+    }
+  };
 
   render() {
     const {navigate} = this.props.navigation;
@@ -239,6 +249,9 @@ export default class AddEvent extends React.Component {
               multiline={true}
             />
           </View>
+
+          <DateTimePickerComp callbackFromParent={this.myCallback}/>
+
         </View>
 
         <View style={styles.containsFlatList}>
