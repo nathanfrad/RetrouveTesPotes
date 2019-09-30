@@ -129,7 +129,6 @@ export default class AddEvent extends React.Component {
       this.setState({
         participantsTemporary: [...this.state.participantsTemporary, ''],
       });
-
     }
   }
 
@@ -193,13 +192,24 @@ export default class AddEvent extends React.Component {
     );
   };
 
+  currentY = 0;
+  scrollOffset = 0;
+  flatListHeight = 0;
+
   scrollToIndex = index => {
-    // this.flatListRef.scrollToEnd();
-    this.flatListRef.scrollToOffset({animated: true, offset: 200});
-    // this.flatListRef.scrollToOffset({
-    //   offset: this.scrollOff + 90,
-    //   animated: false,
-    // });
+    requestAnimationFrame(() => {
+      // check if we are near the bottom or top
+      // Alert.alert(this.scrollOffset);
+      // //Alert.alert(this.currentY + 100 + ' : ' + this.flatListHeight);
+      // if (this.currentY + 100 > this.flatListHeight) {
+      //   this.flatListRef.scrollToOffset({
+      //     offset: this.scrollOffset + 20,
+      //     animated: false,
+      //   });
+      // }
+      // this.scrollToIndex();
+      this.scrollToIndex(index);
+    });
   };
 
   render() {
@@ -261,8 +271,12 @@ export default class AddEvent extends React.Component {
             contentInset={{bottom: 100}}
             keyExtractor={(item, index) => '' + index}
             onScroll={e => {
-              this.scrollOff = e.nativeEvent.contentOffset.y;
+              this.scrollOffset = e.nativeEvent.contentOffset.y;
             }}
+            onLayout={e => {
+              this.flatListHeight = e.nativeEvent.layout.height;
+            }}
+            scrollEventThrottle={16}
           />
         </View>
 
