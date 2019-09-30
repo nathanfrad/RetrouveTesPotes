@@ -7,9 +7,10 @@ import {
   TextInput,
   ScrollView,
   StyleSheet,
+  SafeAreaView,
   Button,
   Alert,
-  TouchableOpacity,
+  TouchableOpacity, FlatList,
 } from 'react-native';
 import database from '@react-native-firebase/database';
 import AsyncStorage from '@react-native-community/async-storage';
@@ -34,7 +35,7 @@ export default class AddEvent extends React.Component {
     const error = [];
     this.state = {
       participants: [],
-      participantsTemporary: [''],
+      participantsTemporary: ['art', 'gens', 'paul', 'erix'],
       ownersArray: this.props.navigation.state.params,
       userId: '',
     };
@@ -112,22 +113,28 @@ export default class AddEvent extends React.Component {
     }
   }
 
-  addParticipant(value) {
+  addParticipant(value, index) {
     if (value === '') {
       Alert.alert('Veuillez remplir les champs participants');
     } else if (this.state.participants.includes(value)) {
       Alert.alert('Ce nom est déja present dans la liste');
     } else {
-      this.setState({participants: this.state.participantsTemporary.filter(Boolean)}, () => {
-        this.setState({isOwner: this.state.participants.length > 0});
-      });
+      this.setState(
+        {participants: this.state.participantsTemporary.filter(Boolean)},
+        () => {
+          this.setState({isOwner: this.state.participants.length > 0});
+          this.scrollToIndex(index);
+        },
+      );
       this.setState({
         participantsTemporary: [...this.state.participantsTemporary, ''],
       });
+
     }
   }
 
   removeParticipant(index) {
+    Alert.alert(index);
     this.state.participantsTemporary.splice(index, 1);
     this.setState(
       {participants: this.state.participantsTemporary.filter(Boolean)},
@@ -154,10 +161,51 @@ export default class AddEvent extends React.Component {
     });
   }
 
+  itemPart = (name, index) => {
+    return (
+      <View style={styles.containerInputParticipant} key={index}>
+        <View style={styles.containInputPart}>
+          <TextInput
+            style={[styles.inputParticipant, this.state.style]}
+            onChangeText={value => this.handleChange(value.toString(), index)}
+            value={name}
+            autoCompleteType={'name'}
+            placeholderTextColor={colors.grey}
+            max
+            placeholder={this.state.isOwner ? 'Autre participant' : 'Votre nom'}
+            maxLength={20}
+          />
+        </View>
+        {this.state.participantsTemporary.length - 1 === index ? (
+          <TouchableOpacity
+            style={styles.addparticipant}
+            onPress={() => this.addParticipant(name, index)}>
+            <Text style={styles.titreSombre}>+</Text>
+          </TouchableOpacity>
+        ) : (
+          <TouchableOpacity
+            style={styles.removeparticipant}
+            onPress={() => this.removeParticipant(index)}>
+            <Text style={{color: colors.deepLemon}}>X</Text>
+          </TouchableOpacity>
+        )}
+      </View>
+    );
+  };
+
+  scrollToIndex = index => {
+    // this.flatListRef.scrollToEnd();
+    this.flatListRef.scrollToOffset({animated: true, offset: 200});
+    // this.flatListRef.scrollToOffset({
+    //   offset: this.scrollOff + 90,
+    //   animated: false,
+    // });
+  };
+
   render() {
     const {navigate} = this.props.navigation;
     return (
-      <View style={styles.globalContainer}>
+      <SafeAreaView style={styles.globalContainer}>
         {/*<Text>State : {this.state.userId}</Text>*/}
 
         <View style={styles.blockSombre}>
@@ -201,52 +249,29 @@ export default class AddEvent extends React.Component {
             />
           </View>
         </View>
-        <ScrollView style={styles.scrollView}>
-          <View style={styles.containerLabelInput}>
-            <Text style={styles.titreClair} numberOfLines={1}>
-              Participants
-            </Text>
-            {this.state.participantsTemporary.map((name, index) => {
-              return (
-                <View style={styles.containerInputParticipant} key={index}>
-                  <View style={styles.containInputPart}>
-                    <TextInput
-                      style={[styles.inputParticipant, this.state.style]}
-                      onChangeText={value => this.handleChange(value, index)}
-                      value={name}
-                      autoCompleteType={'name'}
-                      placeholderTextColor={colors.grey}
-                      max
-                      placeholder={
-                        this.state.isOwner ? 'Autre participant' : 'Votre nom'
-                      }
-                      maxLength={20}
-                    />
-                  </View>
-                  {this.state.participantsTemporary.length - 1 === index ? (
-                    <TouchableOpacity
-                      style={styles.addparticipant}
-                      onPress={() => this.addParticipant(name)}>
-                      <Text style={styles.titreSombre}>+</Text>
-                    </TouchableOpacity>
-                  ) : (
-                    <TouchableOpacity
-                      style={styles.removeparticipant}
-                      onPress={() => this.removeParticipant(index)}>
-                      <Text style={{color: colors.deepLemon}}>X</Text>
-                    </TouchableOpacity>
-                  )}
-                </View>
-              );
-            })}
-          </View>
-        </ScrollView>
+
+        <View style={styles.containsFlatList}>
+          <FlatList
+            ref={ref => {
+              this.flatListRef = ref;
+            }}
+            style={styles.scrollView}
+            data={this.state.participantsTemporary}
+            renderItem={({item, index}) => this.itemPart(item, index)}
+            contentInset={{bottom: 100}}
+            keyExtractor={(item, index) => '' + index}
+            onScroll={e => {
+              this.scrollOff = e.nativeEvent.contentOffset.y;
+            }}
+          />
+        </View>
+
         <TouchableOpacity
           style={styles.btnValider}
           onPress={() => this.submit()}>
           <Text style={styles.titreSombre}>ça va etre la débandade</Text>
         </TouchableOpacity>
-      </View>
+      </SafeAreaView>
     );
   }
 }
@@ -256,14 +281,20 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     backgroundColor: colors.secondary,
     color: colors.platinum,
-    minWidth: '100%',
-    minHeight: '100%',
+    width: '100%',
+    height: '100%',
     justifyContent: 'flex-start',
     overflow: 'hidden',
+    flex: 1,
   },
   scrollView: {
+    // borderWidth: 5,
+    // borderColor: 'green',
+    // backgroundColor: 'red',
+    paddingHorizontal: padding.md,
+  },
+  containsFlatList: {
     flex: 1,
-    marginBottom: 50,
   },
   blockSombre: {
     color: colors.platinum,

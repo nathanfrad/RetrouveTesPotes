@@ -64,7 +64,7 @@ export default class HomeSave extends React.Component {
   render() {
     const {navigate} = this.props.navigation;
     return (
-      <View style={styles.globalContainer}>
+      <SafeAreaView style={styles.globalContainer}>
         <View>
           <Text style={styles.welcome}>Retrouve Tes Potes</Text>
         </View>
@@ -99,7 +99,7 @@ export default class HomeSave extends React.Component {
           <Text style={styles.titreClair}>Statistique des soirée</Text>
           <Text style={styles.paragrapheClair}>Level 7 : Pilier de bar </Text>
         </View>
-      </View>
+      </SafeAreaView>
     );
   }
 }
