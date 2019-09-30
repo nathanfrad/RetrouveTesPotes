@@ -20,7 +20,6 @@ import {
 } from 'react-native';
 import {padding, colors, fontSize, radius} from '../styles/base';
 import AsyncStorage from '@react-native-community/async-storage';
-import {deleteEvent} from '../services/eventService';
 
 export default class HomeSave extends React.Component {
   static navigationOptions = {

@@ -35,7 +35,7 @@ export default class AddEvent extends React.Component {
     const error = [];
     this.state = {
       participants: [],
-      participantsTemporary: ['art', 'gens', 'paul', 'erix'],
+      participantsTemporary: [''],
       ownersArray: this.props.navigation.state.params,
       userId: '',
     };
@@ -123,7 +123,6 @@ export default class AddEvent extends React.Component {
         {participants: this.state.participantsTemporary.filter(Boolean)},
         () => {
           this.setState({isOwner: this.state.participants.length > 0});
-          this.scrollToIndex(index);
         },
       );
       this.setState({
@@ -148,24 +147,24 @@ export default class AddEvent extends React.Component {
     this.setState({participantsTemporary: this.state.participantsTemporary});
   }
 
-  onFocus(value) {
-    this.setState({
-      [value]: colors.deepLemon,
-    });
-  }
-
-  onBlur() {
-    this.ref.setNativeProps({
-      borderBottomColor: colors.grey,
-    });
-  }
+  // onFocus(value) {
+  //   this.setState({
+  //     [value]: colors.deepLemon,
+  //   });
+  // }
+  //
+  // onBlur(value) {
+  //   this.setState({
+  //     [value]: colors.grey,
+  //   });
+  // }
 
   itemPart = (name, index) => {
     return (
       <View style={styles.containerInputParticipant} key={index}>
         <View style={styles.containInputPart}>
           <TextInput
-            style={[styles.inputParticipant, this.state.style]}
+            style={[styles.inputParticipant, this.state[index]]}
             onChangeText={value => this.handleChange(value.toString(), index)}
             value={name}
             autoCompleteType={'name'}
@@ -173,6 +172,8 @@ export default class AddEvent extends React.Component {
             max
             placeholder={this.state.isOwner ? 'Autre participant' : 'Votre nom'}
             maxLength={20}
+            // onFocus={this.onFocus(index)}
+            // onBlur={this.onBlur(index)}
           />
         </View>
         {this.state.participantsTemporary.length - 1 === index ? (
@@ -192,25 +193,6 @@ export default class AddEvent extends React.Component {
     );
   };
 
-  currentY = 0;
-  scrollOffset = 0;
-  flatListHeight = 0;
-
-  scrollToIndex = index => {
-    requestAnimationFrame(() => {
-      // check if we are near the bottom or top
-      // Alert.alert(this.scrollOffset);
-      // //Alert.alert(this.currentY + 100 + ' : ' + this.flatListHeight);
-      // if (this.currentY + 100 > this.flatListHeight) {
-      //   this.flatListRef.scrollToOffset({
-      //     offset: this.scrollOffset + 20,
-      //     animated: false,
-      //   });
-      // }
-      // this.scrollToIndex();
-      this.scrollToIndex(index);
-    });
-  };
 
   render() {
     const {navigate} = this.props.navigation;
@@ -233,8 +215,8 @@ export default class AddEvent extends React.Component {
                 this.refs.inputDescription.focus();
               }}
               placeholderTextColor={colors.grey}
-              onBlur={() => this.onBlur()}
-              onFocus={() => this.onFocus('titreUnderline')}
+              // onBlur={() => this.onBlur()}
+              // onFocus={() => this.onFocus('titreUnderline')}
               maxLength={30}
             />
           </View>
@@ -243,7 +225,6 @@ export default class AddEvent extends React.Component {
               Description
             </Text>
             <TextInput
-              ref={'inputDescription'}
               style={[styles.textInput, this.state.inputDescription]}
               placeholder={'Pas d\'abus, que de l\'excés !'}
               onChangeText={text => this.setState({description: text})}
@@ -252,8 +233,8 @@ export default class AddEvent extends React.Component {
                 this.refs.Description.focus();
               }}
               placeholderTextColor={colors.grey}
-              onBlur={() => this.onBlur()}
-              onFocus={() => this.onFocus(this.ref)}
+              // onBlur={() => this.onBlur()}
+              // onFocus={() => this.onFocus(this.ref)}
               maxLength={150}
               multiline={true}
             />
@@ -262,9 +243,6 @@ export default class AddEvent extends React.Component {
 
         <View style={styles.containsFlatList}>
           <FlatList
-            ref={ref => {
-              this.flatListRef = ref;
-            }}
             style={styles.scrollView}
             data={this.state.participantsTemporary}
             renderItem={({item, index}) => this.itemPart(item, index)}

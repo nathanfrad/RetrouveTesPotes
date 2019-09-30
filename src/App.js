@@ -31,7 +31,7 @@ const MainNavigator = createStackNavigator(
     },
   },
   {
-    initialRouteName: 'AddEvent',
+    initialRouteName: 'Home',
   },
 );
 
