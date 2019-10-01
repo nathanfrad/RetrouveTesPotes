@@ -10,11 +10,13 @@ import {
   SafeAreaView,
   Button,
   Alert,
-  TouchableOpacity, FlatList,
+  TouchableOpacity,
+  FlatList,
 } from 'react-native';
 import database from '@react-native-firebase/database';
 import AsyncStorage from '@react-native-community/async-storage';
 import {createUserWithEvent, addEventToUser} from '../../services/userService';
+import {addDescriptionToEvent, createEvent} from '../../services/eventService';
 import {fontSize, radius} from '../../styles/base';
 import DateTimePickerComp from '../../components/DateTimePickerComp';
 import moment from 'moment';
@@ -59,63 +61,69 @@ export default class AddEvent extends React.Component {
     );
   };
 
-  submit() {
-    if (this.state.titre !== '' || this.state.participants.length > 1) {
-      // ref events
-      let eventsPush = database()
-        .ref('events/')
-        .push();
-      eventsPush
-        .set({
-          titre: this.state.titre,
-          date: this.state.date,
-        })
-        .then(() => {
-          // on parcours les participant du formulaire
-          this.state.participants.map((pseudoParticipant, index) => {
-            let participantPush = eventsPush.child('participants/').push();
-            participantPush.set({
-              pseudo: pseudoParticipant,
-            });
-
-            if (index === 0) {
-              if (this.state.userId === '' || this.state.userId === null) {
-                // on créer un nouveau user dans la base
-                createUserWithEvent(
-                  eventsPush,
-                  participantPush,
-                  pseudoParticipant,
-                );
-              } else {
-                const userId = this.state.userId;
-                // on ajoute l'evenement au owner existant
-                addEventToUser(
-                  userId,
-                  eventsPush,
-                  participantPush,
-                  pseudoParticipant,
-                );
-              }
-              // on stocke les pseudos owner
-              this.setState({
-                ownersArray: [
-                  ...this.state.ownersArray,
-                  {
-                    eventsKey: eventsPush.key,
-                    pseudo: pseudoParticipant,
-                    id: participantPush.key,
-                  },
-                ],
-              });
-              this.setAsyncStorage();
-            }
-          });
-        });
-      this.props.navigation.navigate('Home');
+  validateForms = () => {
+    const {titre, participants} = this.state;
+    if (
+      titre !== undefined &&
+      titre.length > 0 &&
+      !titre.replace(/\s/g, '').length &&
+      participants.length >= 2
+    ) {
+      this.submit();
     } else {
-      Alert.alert('veuillez renseigner un titre');
+      Alert.alert(
+        'L\'évenement doit etre composé au minimum d\'un titre et de deux participants',
+      );
     }
-  }
+  };
+
+  submit = () => {
+    // ref events
+    let eventsPush = createEvent(this.state);
+
+    eventsPush.then(() => {
+      // on ajoute la description si elle existe
+      if (this.state.description !== '') {
+        addDescriptionToEvent(eventsPush, this.state.description);
+      }
+      // on parcours les participant du formulaire
+      this.state.participants.map((pseudoParticipant, index) => {
+        let participantPush = eventsPush.child('participants/').push();
+        participantPush.set({
+          pseudo: pseudoParticipant,
+        });
+
+        if (index === 0) {
+          if (this.state.userId === '' || this.state.userId === null) {
+            // on créer un nouveau user dans la base
+            createUserWithEvent(eventsPush, participantPush, pseudoParticipant);
+          } else {
+            const userId = this.state.userId;
+            // on ajoute l'evenement au owner existant
+            addEventToUser(
+              userId,
+              eventsPush,
+              participantPush,
+              pseudoParticipant,
+            );
+          }
+          // on stocke les pseudos owner
+          this.setState({
+            ownersArray: [
+              ...this.state.ownersArray,
+              {
+                eventsKey: eventsPush.key,
+                pseudo: pseudoParticipant,
+                id: participantPush.key,
+              },
+            ],
+          });
+          this.setAsyncStorage();
+        }
+      });
+    });
+    this.props.navigation.navigate('Home');
+  };
 
   addParticipant(value, index) {
     if (value === '') {
@@ -151,24 +159,62 @@ export default class AddEvent extends React.Component {
     this.setState({participantsTemporary: this.state.participantsTemporary});
   }
 
-  // onFocus(value) {
-  //   this.setState({
-  //     [value]: colors.deepLemon,
-  //   });
-  // }
-  //
-  // onBlur(value) {
-  //   this.setState({
-  //     [value]: colors.grey,
-  //   });
-  // }
+  onFocus(index) {
+    this.setState({
+      [index]: colors.deepLemon,
+    });
+  }
+
+  onBlur(index, value) {
+    if (value === true) {
+      this.setState({
+        [index]: colors.grey,
+      });
+    } else if (value === undefined || value.length === 0 || !value.replace(/\s/g, '').length) {
+      this.setState({
+        [index]: colors.red,
+      });
+    } else {
+      this.setState({
+        [index]: colors.grey,
+      });
+    }
+  }
+
+  onBlurParticipant(index, value) {
+    if ((value === undefined || value.length === 0) && index < 2) {
+      this.setState({
+        [index]: colors.red,
+      });
+    } else {
+      this.setState({
+        [index]: colors.grey,
+      });
+    }
+  }
+
+  getTextStyle = value => {
+    if (value !== undefined) {
+      return {
+        borderColor: value,
+      };
+    } else {
+      return {
+        borderColor: colors.grey,
+      };
+    }
+  };
 
   itemPart = (name, index) => {
     return (
       <View style={styles.containerInputParticipant} key={index}>
         <View style={styles.containInputPart}>
           <TextInput
-            style={[styles.inputParticipant, this.state[index]]}
+            ref={index}
+            style={[
+              styles.inputParticipant,
+              this.getTextStyle(this.state[index]),
+            ]}
             onChangeText={value => this.handleChange(value.toString(), index)}
             value={name}
             autoCompleteType={'name'}
@@ -176,8 +222,8 @@ export default class AddEvent extends React.Component {
             max
             placeholder={this.state.isOwner ? 'Autre participant' : 'Votre nom'}
             maxLength={20}
-            // onFocus={this.onFocus(index)}
-            // onBlur={this.onBlur(index)}
+            onFocus={() => this.onFocus(index)}
+            onBlur={() => this.onBlurParticipant(index, name)}
           />
         </View>
         {this.state.participantsTemporary.length - 1 === index ? (
@@ -198,7 +244,6 @@ export default class AddEvent extends React.Component {
   };
 
   myCallback = dataFromChild => {
-    // Alert.alert(dataFromChild);
     this.setState({
       date: dataFromChild,
     });
@@ -216,7 +261,10 @@ export default class AddEvent extends React.Component {
               L'excuse de la soirée ?{' '}
             </Text>
             <TextInput
-              style={styles.textInput}
+              style={[
+                styles.textInput,
+                this.getTextStyle(this.state.underlineTitre),
+              ]}
               placeholder={'Titre'}
               onChangeText={value => this.setState({titre: value})}
               value={this.state.titre}
@@ -225,9 +273,9 @@ export default class AddEvent extends React.Component {
                 this.refs.inputDescription.focus();
               }}
               placeholderTextColor={colors.grey}
-              // onBlur={() => this.onBlur()}
-              // onFocus={() => this.onFocus('titreUnderline')}
               maxLength={30}
+              onFocus={() => this.onFocus('underlineTitre')}
+              onBlur={() => this.onBlur('underlineTitre', this.state.titre)}
             />
           </View>
           <View style={styles.containerLabelInput}>
@@ -235,7 +283,10 @@ export default class AddEvent extends React.Component {
               Description
             </Text>
             <TextInput
-              style={[styles.textInput, this.state.inputDescription]}
+              style={[
+                styles.textInput,
+                this.getTextStyle(this.state.underlineDescript),
+              ]}
               placeholder={'Pas d\'abus, que de l\'excés !'}
               onChangeText={text => this.setState({description: text})}
               value={this.state.description}
@@ -243,15 +294,14 @@ export default class AddEvent extends React.Component {
                 this.refs.Description.focus();
               }}
               placeholderTextColor={colors.grey}
-              // onBlur={() => this.onBlur()}
-              // onFocus={() => this.onFocus(this.ref)}
+              onFocus={() => this.onFocus('underlineDescript')}
+              onBlur={() => this.onBlur('underlineDescript', true)}
               maxLength={150}
               multiline={true}
             />
           </View>
 
           <DateTimePickerComp callbackFromParent={this.myCallback}/>
-
         </View>
 
         <View style={styles.containsFlatList}>
@@ -273,7 +323,7 @@ export default class AddEvent extends React.Component {
 
         <TouchableOpacity
           style={styles.btnValider}
-          onPress={() => this.submit()}>
+          onPress={() => this.validateForms()}>
           <Text style={styles.titreSombre}>ça va etre la débandade</Text>
         </TouchableOpacity>
       </SafeAreaView>
@@ -327,7 +377,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.deepLemon,
     color: colors.platinum,
     borderRadius: radius.xl,
-    marginVertical: padding.sm,
+    marginTop: padding.lg,
   },
   containInputPart: {
     backgroundColor: colors.primary,
@@ -342,9 +392,11 @@ const styles = StyleSheet.create({
   inputParticipant: {
     paddingVertical: padding.sm,
     borderBottomWidth: 1,
-    borderColor: colors.grey,
     backgroundColor: colors.primary,
     color: colors.platinum,
+  },
+  underline: {
+    borderColor: colors.grey,
   },
   addparticipant: {
     padding: padding.md,
@@ -376,7 +428,8 @@ const styles = StyleSheet.create({
   },
   containerLabelInput: {
     flexDirection: 'column',
-    padding: padding.lg,
+    paddingHorizontal: padding.lg,
+    paddingVertical: padding.sm,
   },
   textInput: {
     borderBottomWidth: 1,

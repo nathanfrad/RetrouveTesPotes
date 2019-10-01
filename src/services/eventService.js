@@ -1,9 +1,19 @@
 import database from '@react-native-firebase/database';
 
+export const createEvent = (item) => {
+  let eventsPush = database()
+    .ref('events/')
+    .push();
+  eventsPush.set({
+    titre: item.titre,
+    date: item.date,
+  });
+  return eventsPush;
+};
 
-export const createEvent = item => {
-  database.ref('/items').push({
-    name: item,
+export const addDescriptionToEvent = (eventsPush, value) => {
+  eventsPush.set({
+    description: value,
   });
 };
 

@@ -25,6 +25,7 @@ export const colors = {
   deepLemon: '#FCC117',
   platinum: '#EDEDF1',
   grey: '#78767b',
+  red: '#ff1661',
 };
 
 export const padding = {

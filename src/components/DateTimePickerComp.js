@@ -30,11 +30,17 @@ export default class DateTimePickerComp extends Component {
   };
 
   handleDatePicked = date => {
-    this.setState({
-      date: moment(date).format('DD-MM-YYYY'),
-    });
-    this.props.callbackFromParent(moment(date).format('DD-MM-YYYY'));
-    this.hideDateTimePicker();
+    let currentDate = moment().format('DD-MM-YYYY'); //Current Date,
+    let dateInput = moment(date).format('DD-MM-YYYY');
+    if (currentDate <= dateInput) {
+      this.setState({
+        date: dateInput,
+      });
+      this.props.callbackFromParent(moment(date).format('DD-MM-YYYY'));
+      this.hideDateTimePicker();
+    } else {
+      Alert.alert(' Veuillez rentrer une date dans le futur');
+    }
   };
 
   render() {
@@ -71,6 +77,7 @@ const styles = StyleSheet.create({
     color: colors.platinum,
     justifyContent: 'center',
     alignItems: 'center',
+    paddingBottom: padding.md,
   },
   bulleContour: {
     flexDirection: 'column',
