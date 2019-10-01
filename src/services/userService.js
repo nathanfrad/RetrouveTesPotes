@@ -1,7 +1,11 @@
 import database from '@react-native-firebase/database';
 import AsyncStorage from '@react-native-community/async-storage';
 
-export const addUserWithEvent = (eventsPush, participantPush, participant) => {
+export const createUserWithEvent = (
+  eventsPush,
+  participantPush,
+  participant,
+) => {
   // on créer un nouveau user dans la base
   let users = database()
     .ref('users')

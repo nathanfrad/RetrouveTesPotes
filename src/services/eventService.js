@@ -1,6 +1,7 @@
 import database from '@react-native-firebase/database';
 
-export const addItem = item => {
+
+export const createEvent = item => {
   database.ref('/items').push({
     name: item,
   });

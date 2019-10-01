@@ -14,7 +14,7 @@ import {
 } from 'react-native';
 import database from '@react-native-firebase/database';
 import AsyncStorage from '@react-native-community/async-storage';
-import {addUserWithEvent, addEventToUser} from '../../services/userService';
+import {createUserWithEvent, addEventToUser} from '../../services/userService';
 import {fontSize, radius} from '../../styles/base';
 import DateTimePickerComp from '../../components/DateTimePickerComp';
 import moment from 'moment';
@@ -40,7 +40,7 @@ export default class AddEvent extends React.Component {
       participantsTemporary: [''],
       ownersArray: this.props.navigation.state.params,
       userId: '',
-      date: moment(Date(new Date())).format('DD-MM-YYYY'), //Current Date,
+      date: moment().format('DD-MM-YYYY'), //Current Date,
     };
   }
 
@@ -68,6 +68,7 @@ export default class AddEvent extends React.Component {
       eventsPush
         .set({
           titre: this.state.titre,
+          date: this.state.date,
         })
         .then(() => {
           // on parcours les participant du formulaire
@@ -80,7 +81,7 @@ export default class AddEvent extends React.Component {
             if (index === 0) {
               if (this.state.userId === '' || this.state.userId === null) {
                 // on créer un nouveau user dans la base
-                addUserWithEvent(
+                createUserWithEvent(
                   eventsPush,
                   participantPush,
                   pseudoParticipant,
@@ -196,12 +197,11 @@ export default class AddEvent extends React.Component {
     );
   };
 
-  myCallback = (dataFromChild) => {
-    if (dataFromChild !== null) {
-      this.setState({
-        date: dataFromChild,
-      });
-    }
+  myCallback = dataFromChild => {
+    // Alert.alert(dataFromChild);
+    this.setState({
+      date: dataFromChild,
+    });
   };
 
   render() {

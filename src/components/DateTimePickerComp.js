@@ -17,6 +17,7 @@ export default class DateTimePickerComp extends Component {
     super(props);
     this.state = {
       isDateTimePickerVisible: false,
+      date: moment().format('DD-MM-YYYY'), //Current Date,
     };
   }
 
@@ -29,9 +30,11 @@ export default class DateTimePickerComp extends Component {
   };
 
   handleDatePicked = date => {
-    Alert.alert('A date has been picked: ', date.toString());
-    this.props.callbackFromParent(date);
-    // this.hideDateTimePicker();
+    this.setState({
+      date: moment(date).format('DD-MM-YYYY'),
+    });
+    this.props.callbackFromParent(moment(date).format('DD-MM-YYYY'));
+    this.hideDateTimePicker();
   };
 
   render() {
@@ -45,7 +48,7 @@ export default class DateTimePickerComp extends Component {
             style={styles.bulleContour}
             onPress={this.showDateTimePicker}>
             <Text style={styles.datePicker} numberOfLines={1}>
-              {moment(Date(this.state.date)).format('DD-MM-YYYY')}
+              {this.state.date}
             </Text>
           </TouchableOpacity>
           <Text style={styles.citation} numberOfLines={1}>
