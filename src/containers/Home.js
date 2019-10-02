@@ -21,6 +21,10 @@ import {
 import {padding, colors, fontSize, radius} from '../styles/base';
 import AsyncStorage from '@react-native-community/async-storage';
 
+import SuperHero from '../assets/svg/undraw_superhero_kguv.svg';
+import SocialMedia from '../assets/svg/shareSombre.svg';
+
+
 export default class HomeSave extends React.Component {
   static navigationOptions = {
     title: 'Home',
@@ -63,7 +67,7 @@ export default class HomeSave extends React.Component {
   render() {
     const {navigate} = this.props.navigation;
     return (
-      <SafeAreaView style={styles.globalContainer}>
+      <View style={styles.body}>
         <View>
           <Text style={styles.welcome}>Retrouve Tes Potes</Text>
         </View>
@@ -88,31 +92,34 @@ export default class HomeSave extends React.Component {
         </View>
 
         <View style={styles.bulleSecours}>
-          <Text style={styles.titreClair}>
-            Deviens le herosd e la soirée ! Regarde les premiers gestes de
-            secours
-          </Text>
+          <SuperHero width={130} height={130}/>
+          <View style={styles.textSecours}>
+            <Text style={styles.titreSecours}>
+              Deviens le heros de la soirée !
+            </Text>
+            <Text style={styles.sousTitreSecours}>
+              Regarde les premiers gestes de secours
+            </Text>
+          </View>
         </View>
 
         <View style={styles.bulleContour}>
           <Text style={styles.titreClair}>Statistique des soirée</Text>
           <Text style={styles.paragrapheClair}>Level 7 : Pilier de bar </Text>
         </View>
-      </SafeAreaView>
+      </View>
     );
   }
 }
 
 const styles = StyleSheet.create({
-  globalContainer: {
+  body: {
     flexDirection: 'column',
-    padding: padding.md,
+    padding: padding.lg,
     backgroundColor: colors.primary,
-    color: colors.platinum,
-    minWidth: '100%',
-    minHeight: '100%',
+    width: '100%',
+    height: '100%',
     justifyContent: 'space-evenly',
-    fontSize: 40,
   },
   welcome: {
     color: colors.platinum,
@@ -158,11 +165,12 @@ const styles = StyleSheet.create({
   },
 
   bulleSecours: {
-    flexDirection: 'column',
-    padding: padding.lg,
+    flexDirection: 'row',
     color: colors.royalBlue,
     borderRadius: radius.sm,
     marginVertical: padding.sm,
+    justifyContent: 'space-between',
+    width: '100%',
   },
   containerRow: {
     flexDirection: 'row',
@@ -183,6 +191,23 @@ const styles = StyleSheet.create({
 
   paragrapheClair: {
     color: colors.grey,
+    fontSize: fontSize.sousTitre,
+    flex: 1,
+  },
+  textSecours: {
+    flexDirection: 'column',
+    justifyContent: 'center',
+    flex: 1,
+    paddingLeft: padding.sm,
+  },
+  titreSecours: {
+    color: colors.platinum,
+    fontSize: fontSize.titre,
+    fontWeight: 'bold',
+    paddingBottom: padding.sm,
+  },
+  sousTitreSecours: {
+    color: colors.platinum,
     fontSize: fontSize.sousTitre,
   },
 });

@@ -259,10 +259,15 @@ export default class AddEvent extends React.Component {
     this.setState({modalVisible: !this.state.modalVisible});
   };
 
+  closeModal = () => {
+    this.switchModalVisible();
+    this.props.navigation.navigate('Home');
+  };
+
   render() {
     const {navigate} = this.props.navigation;
     return (
-      <SafeAreaView style={styles.globalContainer}>
+      <View style={styles.globalContainer}>
         {/*<Text>State : {this.state.userId}</Text>*/}
 
         <View style={styles.blockSombre}>
@@ -337,10 +342,10 @@ export default class AddEvent extends React.Component {
           <Text style={styles.titreSombre}>ça va etre la débandade</Text>
         </TouchableOpacity>
         <ModalShare
-          modalVisibleBoolean={true}
-          switchModalVisiblee={this.switchModalVisible}
+          modalVisibleBoolean={this.state.modalVisible}
+          switchModalVisiblee={this.closeModal}
         />
-      </SafeAreaView>
+      </View>
     );
   }
 }

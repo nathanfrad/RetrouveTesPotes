@@ -7,7 +7,7 @@ import {
   SafeAreaView,
   StyleSheet,
   Share,
-  TouchableOpacity,
+  TouchableHighlight,
 } from 'react-native';
 import moment from 'moment';
 import {colors, fontSize, padding, radius} from '../styles/base';
@@ -31,6 +31,7 @@ export default class ModalShare extends Component {
           // shared with activity type of result.activityType
         } else {
           // shared
+          this.props.navigation.navigate('Home');
         }
       } else if (result.action === Share.dismissedAction) {
         // dismissed
@@ -50,36 +51,38 @@ export default class ModalShare extends Component {
         onRequestClose={() => {
           Alert.alert('Modal has been closed.');
         }}>
-        <SafeAreaView style={styles.containModal}>
+        <View style={styles.containModal}>
           <HavingFun width={'90%'} height={'40%'}/>
 
-          <TouchableOpacity
+          <TouchableHighlight
             style={styles.modal}
             onPress={() => {
               this.onShare();
             }}>
-            <View style={styles.textModal}>
-              <Text style={styles.titreSombre} numberOfLines={1}>
-                Préviens les participants !
-              </Text>
-              <Text style={styles.sousTitreSombre}>
-                Dépêche-toi, avant qu'il n'y ai plus de bulles...
-              </Text>
-            </View>
+            <>
+              <View style={styles.textModal}>
+                <Text style={styles.titreSombre} numberOfLines={1}>
+                  Préviens les participants !
+                </Text>
+                <Text style={styles.sousTitreSombre}>
+                  Dépêche-toi, avant qu'il n'y ai plus de bulles...
+                </Text>
+              </View>
 
-            <View style={styles.share}>
-              <SocialMedia width={40} height={40}/>
-            </View>
-          </TouchableOpacity>
+              <View style={styles.share}>
+                <SocialMedia width={40} height={40}/>
+              </View>
+            </>
+          </TouchableHighlight>
           <View style={styles.skip}>
-            <TouchableOpacity
+            <TouchableHighlight
               onPress={() => {
                 this.props.switchModalVisiblee();
               }}>
               <Text style={{color: colors.platinum}}>Plus tard</Text>
-            </TouchableOpacity>
+            </TouchableHighlight>
           </View>
-        </SafeAreaView>
+        </View>
       </Modal>
     );
   }
@@ -100,7 +103,6 @@ const styles = StyleSheet.create({
   modal: {
     flexDirection: 'row',
     backgroundColor: colors.deepLemon,
-    color: colors.platinum,
     padding: padding.md,
     borderRadius: radius.sm,
     marginTop: -100,
