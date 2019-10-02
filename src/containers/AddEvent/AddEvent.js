@@ -172,7 +172,11 @@ export default class AddEvent extends React.Component {
       this.setState({
         [index]: colors.grey,
       });
-    } else if (value === undefined || value.length === 0 || !value.replace(/\s/g, '').length) {
+    } else if (
+      value === undefined ||
+      value.length === 0 ||
+      !value.replace(/\s/g, '').length
+    ) {
       this.setState({
         [index]: colors.red,
       });
@@ -251,15 +255,14 @@ export default class AddEvent extends React.Component {
     });
   };
 
-  switchModalVisible() {
+  switchModalVisible = () => {
     this.setState({modalVisible: !this.state.modalVisible});
-  }
+  };
 
   render() {
     const {navigate} = this.props.navigation;
     return (
       <SafeAreaView style={styles.globalContainer}>
-
         {/*<Text>State : {this.state.userId}</Text>*/}
 
         <View style={styles.blockSombre}>
@@ -334,8 +337,8 @@ export default class AddEvent extends React.Component {
           <Text style={styles.titreSombre}>ça va etre la débandade</Text>
         </TouchableOpacity>
         <ModalShare
-          modalVisibleBoolean={this.state.modalVisible}
-          // switchModalVisiblee={this.switchModalVisible}
+          modalVisibleBoolean={true}
+          switchModalVisiblee={this.switchModalVisible}
         />
       </SafeAreaView>
     );

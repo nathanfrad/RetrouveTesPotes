@@ -5,32 +5,33 @@ import {
   TouchableHighlight,
   View,
   Alert,
-  SafeAreaView,
+  SafeAreaView, StyleSheet,
 } from 'react-native';
 import moment from 'moment';
+import {colors, fontSize, padding, radius} from '../styles/base';
 
 export default class ModalShare extends Component {
   constructor(props) {
     super(props);
-    this.state = {
-      modalVisible: false,
-    };
+    // this.state = {
+    //   modalVisible: false,
+    // };
   }
 
-  component(): void {
-    this.setState(
-      {
-        modalVisible: this.props.modalVisibleBoolean,
-      },
-      () => {
-        Alert.alert('cc : ' + this.state.modalVisible);
-      },
-    );
-  }
-
-  switchModalVisible() {
-    this.setState({modalVisible: !this.state.modalVisible});
-  }
+  // component(): void {
+  //   this.setState(
+  //     {
+  //       modalVisible: this.props.modalVisibleBoolean,
+  //     },
+  //     () => {
+  //       Alert.alert('cc : ' + this.state.modalVisible);
+  //     },
+  //   );
+  // }
+  //
+  // switchModalVisible() {
+  //   this.setState({modalVisible: !this.state.modalVisible});
+  // }
 
   render() {
     // Alert.alert('cc :' + this.state.modalVisible);
@@ -38,25 +39,57 @@ export default class ModalShare extends Component {
       <Modal
         animationType="slide"
         transparent={true}
-        visible={this.state.modalVisible}
+        visible={this.props.modalVisibleBoolean}
         onRequestClose={() => {
           Alert.alert('Modal has been closed.');
         }}>
-        <SafeAreaView>
-          <View style={{backgroundColor: 'red'}}>
+        <SafeAreaView style={styles.containModal}>
+          <View style={styles.modal}>
             <View>
-              <Text>Hello World!</Text>
-
+              <Text style={styles.titreSombre}>
+                Partage l'évenement aux participants
+              </Text>
+            </View>
+            <View>
               <TouchableHighlight
                 onPress={() => {
-                  this.switchModalVisible();
+                  this.props.switchModalVisiblee();
                 }}>
                 <Text>Hide Modal</Text>
               </TouchableHighlight>
             </View>
+
           </View>
         </SafeAreaView>
       </Modal>
     );
   }
 }
+
+const styles = StyleSheet.create({
+  containModal: {
+    flexDirection: 'column',
+    backgroundColor: colors.primaryTransparent,
+    color: colors.platinum,
+    width: '100%',
+    height: '100%',
+    justifyContent: 'space-evenly',
+    alignItems: 'center',
+    overflow: 'hidden',
+    flex: 1,
+  },
+  modal: {
+    flexDirection: 'column',
+    backgroundColor: colors.deepLemon,
+    color: colors.platinum,
+    alignItems: 'center',
+    padding: padding.lg,
+    borderRadius: radius.sm,
+    marginVertical: padding.sm,
+    maxWidth: '70%',
+  },
+  titreSombre: {
+    color: colors.primary,
+    fontSize: fontSize.titre,
+  },
+});

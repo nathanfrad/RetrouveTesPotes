@@ -26,6 +26,7 @@ export const colors = {
   platinum: '#EDEDF1',
   grey: '#78767b',
   red: '#ff1661',
+  primaryTransparent: 'rgba(27, 26, 2, 0.5)',
 };
 
 export const padding = {
