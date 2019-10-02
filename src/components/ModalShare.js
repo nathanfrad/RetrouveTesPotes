@@ -11,6 +11,8 @@ import {
 } from 'react-native';
 import moment from 'moment';
 import {colors, fontSize, padding, radius} from '../styles/base';
+import HavingFun from '../assets/svg/undraw_having_fun_iais.svg';
+import SocialMedia from '../assets/svg/shareSombre.svg';
 
 export default class ModalShare extends Component {
   constructor(props) {
@@ -49,26 +51,33 @@ export default class ModalShare extends Component {
           Alert.alert('Modal has been closed.');
         }}>
         <SafeAreaView style={styles.containModal}>
-          <View style={styles.modal}>
-            <View>
-              <Text style={styles.titreSombre}>
-                Partage l'évenement aux participants
+          <HavingFun width={'90%'} height={'40%'}/>
+
+          <TouchableOpacity
+            style={styles.modal}
+            onPress={() => {
+              this.onShare();
+            }}>
+            <View style={styles.textModal}>
+              <Text style={styles.titreSombre} numberOfLines={1}>
+                Préviens les participants !
               </Text>
-              <TouchableOpacity
-                onPress={() => {
-                  this.onShare();
-                }}>
-                <Text>Share</Text>
-              </TouchableOpacity>
+              <Text style={styles.sousTitreSombre}>
+                Dépêche-toi, avant qu'il n'y ai plus de bulles...
+              </Text>
             </View>
-            <View>
-              <TouchableOpacity
-                onPress={() => {
-                  this.props.switchModalVisiblee();
-                }}>
-                <Text>Hide Modal</Text>
-              </TouchableOpacity>
+
+            <View style={styles.share}>
+              <SocialMedia width={40} height={40}/>
             </View>
+          </TouchableOpacity>
+          <View style={styles.skip}>
+            <TouchableOpacity
+              onPress={() => {
+                this.props.switchModalVisiblee();
+              }}>
+              <Text style={{color: colors.platinum}}>Plus tard</Text>
+            </TouchableOpacity>
           </View>
         </SafeAreaView>
       </Modal>
@@ -79,27 +88,48 @@ export default class ModalShare extends Component {
 const styles = StyleSheet.create({
   containModal: {
     flexDirection: 'column',
-    backgroundColor: colors.primaryTransparent,
+    backgroundColor: colors.primary,
     color: colors.platinum,
     width: '100%',
     height: '100%',
-    justifyContent: 'space-evenly',
+    justifyContent: 'center',
     alignItems: 'center',
     overflow: 'hidden',
     flex: 1,
   },
   modal: {
-    flexDirection: 'column',
+    flexDirection: 'row',
     backgroundColor: colors.deepLemon,
     color: colors.platinum,
-    alignItems: 'center',
-    padding: padding.lg,
+    padding: padding.md,
     borderRadius: radius.sm,
-    marginVertical: padding.sm,
-    maxWidth: '70%',
+    marginTop: -100,
+    width: '80%',
+    justifyContent: 'space-between',
   },
   titreSombre: {
     color: colors.primary,
-    fontSize: fontSize.titre,
+    fontSize: fontSize.sousTitre,
+    fontWeight: 'bold',
+    paddingBottom: padding.sm,
+  },
+  sousTitreSombre: {
+    color: colors.primary,
+    fontSize: fontSize.label,
+  },
+  textModal: {
+    width: '75%',
+  },
+  share: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: padding.sm,
+  },
+  skip: {
+    width: '80%',
+    justifyContent: 'flex-end',
+    flexDirection: 'row',
+    color: colors.platinum,
+    padding: padding.sm,
   },
 });
