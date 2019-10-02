@@ -19,6 +19,7 @@ import {createUserWithEvent, addEventToUser} from '../../services/userService';
 import {addDescriptionToEvent, createEvent} from '../../services/eventService';
 import {fontSize, radius} from '../../styles/base';
 import DateTimePickerComp from '../../components/DateTimePickerComp';
+import ModalShare from '../../components/ModalShare';
 import moment from 'moment';
 
 export default class AddEvent extends React.Component {
@@ -43,6 +44,7 @@ export default class AddEvent extends React.Component {
       ownersArray: this.props.navigation.state.params,
       userId: '',
       date: moment().format('DD-MM-YYYY'), //Current Date,
+      modalVisible: false,
     };
   }
 
@@ -62,19 +64,20 @@ export default class AddEvent extends React.Component {
   };
 
   validateForms = () => {
-    const {titre, participants} = this.state;
-    if (
-      titre !== undefined &&
-      titre.length > 0 &&
-      !titre.replace(/\s/g, '').length &&
-      participants.length >= 2
-    ) {
-      this.submit();
-    } else {
-      Alert.alert(
-        'L\'évenement doit etre composé au minimum d\'un titre et de deux participants',
-      );
-    }
+    this.switchModalVisible();
+    // const {titre, participants} = this.state;
+    // if (
+    //   titre !== undefined &&
+    //   titre.length > 0 &&
+    //   !titre.replace(/\s/g, '').length &&
+    //   participants.length >= 2
+    // ) {
+    //   this.submit();
+    // } else {
+    //   Alert.alert(
+    //     'L\'évenement doit etre composé au minimum d\'un titre et de deux participants',
+    //   );
+    // }
   };
 
   submit = () => {
@@ -122,7 +125,6 @@ export default class AddEvent extends React.Component {
         }
       });
     });
-    this.props.navigation.navigate('Home');
   };
 
   addParticipant(value, index) {
@@ -249,10 +251,15 @@ export default class AddEvent extends React.Component {
     });
   };
 
+  switchModalVisible() {
+    this.setState({modalVisible: !this.state.modalVisible});
+  }
+
   render() {
     const {navigate} = this.props.navigation;
     return (
       <SafeAreaView style={styles.globalContainer}>
+
         {/*<Text>State : {this.state.userId}</Text>*/}
 
         <View style={styles.blockSombre}>
@@ -326,6 +333,10 @@ export default class AddEvent extends React.Component {
           onPress={() => this.validateForms()}>
           <Text style={styles.titreSombre}>ça va etre la débandade</Text>
         </TouchableOpacity>
+        <ModalShare
+          modalVisibleBoolean={this.state.modalVisible}
+          // switchModalVisiblee={this.switchModalVisible}
+        />
       </SafeAreaView>
     );
   }
