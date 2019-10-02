@@ -2,10 +2,12 @@ import React, {Component} from 'react';
 import {
   Modal,
   Text,
-  TouchableHighlight,
   View,
   Alert,
-  SafeAreaView, StyleSheet,
+  SafeAreaView,
+  StyleSheet,
+  Share,
+  TouchableOpacity,
 } from 'react-native';
 import moment from 'moment';
 import {colors, fontSize, padding, radius} from '../styles/base';
@@ -13,25 +15,28 @@ import {colors, fontSize, padding, radius} from '../styles/base';
 export default class ModalShare extends Component {
   constructor(props) {
     super(props);
-    // this.state = {
-    //   modalVisible: false,
-    // };
   }
 
-  // component(): void {
-  //   this.setState(
-  //     {
-  //       modalVisible: this.props.modalVisibleBoolean,
-  //     },
-  //     () => {
-  //       Alert.alert('cc : ' + this.state.modalVisible);
-  //     },
-  //   );
-  // }
-  //
-  // switchModalVisible() {
-  //   this.setState({modalVisible: !this.state.modalVisible});
-  // }
+  onShare = async () => {
+    try {
+      const result = await Share.share({
+        message:
+          'React Native | A framework for building native apps using React',
+      });
+
+      if (result.action === Share.sharedAction) {
+        if (result.activityType) {
+          // shared with activity type of result.activityType
+        } else {
+          // shared
+        }
+      } else if (result.action === Share.dismissedAction) {
+        // dismissed
+      }
+    } catch (error) {
+      alert(error.message);
+    }
+  };
 
   render() {
     // Alert.alert('cc :' + this.state.modalVisible);
@@ -49,16 +54,21 @@ export default class ModalShare extends Component {
               <Text style={styles.titreSombre}>
                 Partage l'évenement aux participants
               </Text>
+              <TouchableOpacity
+                onPress={() => {
+                  this.onShare();
+                }}>
+                <Text>Share</Text>
+              </TouchableOpacity>
             </View>
             <View>
-              <TouchableHighlight
+              <TouchableOpacity
                 onPress={() => {
                   this.props.switchModalVisiblee();
                 }}>
                 <Text>Hide Modal</Text>
-              </TouchableHighlight>
+              </TouchableOpacity>
             </View>
-
           </View>
         </SafeAreaView>
       </Modal>
