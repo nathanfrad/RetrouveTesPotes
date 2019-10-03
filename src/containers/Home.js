@@ -22,8 +22,6 @@ import {padding, colors, fontSize, radius} from '../styles/base';
 import AsyncStorage from '@react-native-community/async-storage';
 
 import SuperHero from '../assets/svg/undraw_superhero_kguv.svg';
-import SocialMedia from '../assets/svg/shareSombre.svg';
-
 
 export default class HomeSave extends React.Component {
   static navigationOptions = {
@@ -43,11 +41,23 @@ export default class HomeSave extends React.Component {
     super(props);
     this.state = {
       ownersArray: [],
+      events: [],
     };
   }
 
   componentDidMount() {
     this.getAsyncStorage();
+
+    let dbRef = database().ref('events');
+    dbRef.on('child_added', val => {
+      let evenement = val.val();
+      evenement.id = val.key;
+      this.setState(prevState => {
+        return {
+          events: [...prevState.events, evenement],
+        };
+      });
+    });
   }
 
   getAsyncStorage = async () => {
@@ -72,6 +82,14 @@ export default class HomeSave extends React.Component {
           <Text style={styles.welcome}>Retrouve Tes Potes</Text>
         </View>
 
+        {this.state.events.map(event => {
+          return (
+            <View>
+              <Text style={styles.titreClair}>{event.date}</Text>
+            </View>
+          );
+        })}
+
         <TouchableOpacity
           style={styles.bulleLemon}
           onPress={() => {
@@ -84,7 +102,9 @@ export default class HomeSave extends React.Component {
         <TouchableOpacity
           style={styles.bulleGrey}
           onPress={() => navigate('AddEvent', this.state.ownersArray)}>
-          <Text style={styles.paragrapheClair}>Une nouvelle excuse pour faire soirée ?</Text>
+          <Text style={styles.paragrapheClair}>
+            Une nouvelle excuse pour faire soirée ?
+          </Text>
           <Text style={styles.titreClair}>Créer une soirée</Text>
         </TouchableOpacity>
         <View style={styles.bulleGrey}>
@@ -98,7 +118,7 @@ export default class HomeSave extends React.Component {
               Deviens le heros de la soirée !
             </Text>
             <Text style={styles.sousTitreSecours}>
-              Regarde les premiers gestes de secours
+              Regarde les gestes de premiers secours, c'est pas sorcier !
             </Text>
           </View>
         </View>

@@ -11,59 +11,101 @@ import {
   Alert,
 } from 'react-native';
 
-import MapView, {Marker, PROVIDER_GOOGLE} from 'react-native-maps';
+import MapView, {
+  Marker,
+  PROVIDER_GOOGLE,
+  AnimatedRegion,
+  Animated,
+} from 'react-native-maps';
 
 const {width, height} = Dimensions.get('window');
 
 const ASPECT_RATIO = width / height;
-const LATITUDE = 37.78825;
-const LONGITUDE = -122.4324;
-const LATITUDE_DELTA = 0.006922;
-const LONGITUDE_DELTA = LATITUDE_DELTA * ASPECT_RATIO;
+const LATITUDE = 37.766041;
+const LONGITUDE = -122.440703;
+const LATITUDE_DELTA = 0.002;
+const LONGITUDE_DELTA = 0.002;
 const USER = 'Nathan';
-const RadiusCircle = 100;
+const RadiusCircle = 50; // 50 metres
+
+export const APPLE = {
+  latitude: 37.766081,
+  longitude: -122.440743,
+  latitudeDelta: 0.002,
+  longitudeDelta: 0.002,
+};
 
 class Maps extends React.Component {
   constructor(props) {
     super(props);
+    this._currentRegion = new MapView.AnimatedRegion({
+      latitude: LATITUDE,
+      longitude: LONGITUDE,
+      latitudeDelta: 0.002,
+      longitudeDelta: 0.002,
+    });
 
     this.state = {
-      region: {
+      region: new AnimatedRegion({
         latitude: LATITUDE,
         longitude: LONGITUDE,
-        latitudeDelta: LATITUDE_DELTA,
-        longitudeDelta: LONGITUDE_DELTA,
-      },
-      myGeolocation: {
-        latitude: LATITUDE,
-        longitude: LONGITUDE,
-        error: null,
-      },
+        latitudeDelta: 0.002,
+        longitudeDelta: 0.002,
+      }),
       markers: [
         {
           title: 'Arthur',
-          coordinate: {
+          coordinate: new AnimatedRegion({
             latitude: 37.76607333,
             longitude: -122.44054,
-          },
+            latitudeDelta: 0,
+            longitudeDelta: 0,
+          }),
         },
         {
           title: 'Paul',
-          coordinate: {
+          coordinate: new AnimatedRegion({
             latitude: 37.76609333,
             longitude: -122.442304,
-          },
+            latitudeDelta: 0,
+            longitudeDelta: 0,
+          }),
         },
         {
           title: 'Jean',
-          coordinate: {
+          coordinate: new AnimatedRegion({
             latitude: 37.76606333,
             longitude: -122.44005,
-          },
+            latitudeDelta: 0,
+            longitudeDelta: 0,
+          }),
         },
       ],
     };
   }
+
+  //
+  // componentWillReceiveProps(nextProps) {
+  //   const duration = 500;
+  //
+  //   if (this.props.coordinate !== nextProps.coordinate) {
+  //     if (Platform.OS === 'android') {
+  //       if (this.marker) {
+  //         this.marker._component.animateMarkerToCoordinate(
+  //           nextProps.coordinate,
+  //           duration,
+  //         );
+  //       }
+  //     } else {
+  //       this.state.coordinate
+  //         .timing({
+  //           ...nextProps.coordinate,
+  //           duration,
+  //         })
+  //         .start();
+  //     }
+  //   }
+  // }
 
   getMapRegion = () => ({
     latitude: this.state.latitude,
@@ -120,84 +162,143 @@ class Maps extends React.Component {
     let totalLongitude = 0;
     let averageLatitude = 0;
     let averageLongitude = 0;
-    this.state.markers.map((marker, index) => {
-      totalLatitude = totalLatitude + marker.coordinate.latitude;
-      totalLongitude = totalLongitude + marker.coordinate.longitude;
-      averageLatitude = totalLatitude / (index + 1);
-      averageLongitude = totalLongitude / (index + 1);
-    });
-
-    this.setState({
-      averageMarker: {
-        title: 'Average',
-        coordinate: {
-          latitude: averageLatitude,
-          longitude: averageLongitude,
-        },
-      },
-    });
-
-    this.setState(
-      {
-        averageMarker: {
-          title: 'Average',
-          coordinate: {
-            latitude: averageLatitude,
-            longitude: averageLongitude,
-          },
-        },
+    this.state.markers.map(
+      (marker, index) => {
+        totalLatitude = totalLatitude + marker.coordinate.latitude;
+        totalLongitude = totalLongitude + marker.coordinate.longitude;
+        averageLatitude = totalLatitude / (index + 1);
+        averageLongitude = totalLongitude / (index + 1);
       },
       () => {
-        this.verifDistance();
+        this.setState(
+          {
+            averageMarker: {
+              title: 'Average',
+              coordinate: new AnimatedRegion({
+                latitude: averageLatitude,
+                longitude: averageLongitude,
+                latitudeDelta: 0,
+                longitudeDelta: 0,
+              }),
+            },
+          },
+          () => {
+            // this.verifDistance();
+          },
+        );
       },
     );
   };
 
-  componentDidMount() {
-    Geolocation.watchPosition(
-      positionUser => {
-        const {latitude, longitude} = positionUser.coords;
-        this.setState({latitude, longitude});
+  onRegionChange = region => {
+    this.setState({region: region});
+  };
+  getCurrentLocalisation = () => {
+    return new Promise(function (resolve, reject) {
+      Geolocation.watchPosition(
+        //succes
+        positionUser => {
+          resolve(positionUser.coords);
+        },
+        // error
+        error => reject(error),
+        // options
+        {
+          enableHighAccuracy: true,
+          timeout: 20000,
+          maximumAge: 1000,
+          distanceFilter: 10,
+        },
+        {distanceFilter: 10},
+      );
+    });
+  };
 
-        this.setState({
-          markers: [
-            ...this.state.markers,
-            {
-              title: USER,
-              coordinate: {
-                latitude: latitude,
-                longitude: longitude,
-              },
-            },
-          ],
-        });
-      },
-      error => console.log(error),
-      {
-        enableHighAccuracy: true,
-        timeout: 20000,
-        maximumAge: 1000,
-        distanceFilter: 10,
-      },
-      {distanceFilter: 10},
-    );
-    this.centerCircle();
+  componentDidMount() {
+    this.getCurrentLocalisation().then(result => {
+      const {latitude, longitude} = result;
+      this.setState({
+        markers: [
+          ...this.state.markers,
+          {
+            title: USER,
+            coordinate: new AnimatedRegion({
+              latitude: latitude,
+              longitude: longitude,
+              latitudeDelta: 0,
+              longitudeDelta: 0,
+            }),
+          },
+        ],
+      });
+
+      this.setState({
+        region: {
+          latitude: latitude,
+          longitude: longitude,
+          latitudeDelta: LATITUDE_DELTA,
+          longitudeDelta: LONGITUDE_DELTA,
+        },
+      });
+
+      this.setState({
+        currentLocalisation: {
+          latitude: latitude,
+          longitude: longitude,
+          latitudeDelta: LATITUDE_DELTA,
+          longitudeDelta: LONGITUDE_DELTA,
+        },
+      });
+      this.centerCircle();
+    });
   }
+
+  _showApple = (): void => {
+    this._currentRegion
+      .timing({...this.state.currentLocalisation, duration: 2000})
+      .start();
+  };
+  // changeTargetRegion = target => {
+  //   if (target === 'centerCercle') {
+  //     this.setState({
+  //       region: new AnimatedRegion({
+  //         latitude: this.state.averageMarker.coordinate.latitude,
+  //         longitude: this.state.averageMarker.coordinate.longitude,
+  //         latitudeDelta: LATITUDE_DELTA,
+  //         longitudeDelta: LONGITUDE_DELTA,
+  //       }),
+  //     });
+  //   } else if (target === 'userLocalisation') {
+  //     this.setState({
+  //       region: new AnimatedRegion({
+  //         latitude: this.state.currentLocalisation.latitude,
+  //         longitude: this.state.currentLocalisation.longitude,
+  //         latitudeDelta: LATITUDE_DELTA,
+  //         longitudeDelta: LONGITUDE_DELTA,
+  //       }),
+  //     });
+  //   }
+  // };
+
+  _onRegionChangeComplete = (region: Region): void => {
+    this._currentRegion.setValue(region);
+  };
 
   render() {
     return (
       <View style={styles.container}>
-        <MapView
+        <MapView.Animated
           provider={PROVIDER_GOOGLE}
-          //provider={PROVIDER_GOOGLE}
           style={styles.map}
-          region={this.getMapRegion()}
-          // initialRegion={this.state.region}
+          region={this._currentRegion}
+          onRegionChangeComplete={this._onRegionChangeComplete}
+          // zoomEnabled={true}
+          // scrollEnabled={true}
         >
           {this.state.markers.map((marker, index) => {
             if (marker.title === USER) {
               return (
-                <Marker
+                <MapView.Marker.Animated
                   description={marker.title}
                   title={marker.title}
                   pinColor={'green'}
@@ -207,7 +308,7 @@ class Maps extends React.Component {
               );
             } else {
               return (
-                <Marker
+                <MapView.Marker.Animated
                   description={marker.title}
                   title={marker.title}
                   pinColor={'blue'}
@@ -225,7 +326,10 @@ class Maps extends React.Component {
                 radius={RadiusCircle}
                 strokeColor={'rgba(1, 66, 96, 1)'}
                 strokeWidth={1}
-                fillColor={'rgba(1, 66, 96, 0.2)'}
+                fillColor={'rgba(1, 66, 96, 0.8)'}
+                ref={ref => {
+                  this.circle = ref;
+                }}
               />
               <Marker
                 title={this.state.averageMarker.title}
@@ -237,23 +341,25 @@ class Maps extends React.Component {
           )}
 
           {/*<Marker coordinate={this.getMapRegion()}/>*/}
-        </MapView>
+        </MapView.Animated>
 
         <View style={styles.buttonContainer}>
           <TouchableOpacity
-            onPress={() => this.setState({markers: []})}
+            onPress={this._showApple}
             style={styles.bubble}>
-            <Text>Tap to create a marker of random color</Text>
+            <Text>Ma localisation</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            onPress={() => this.changeTargetRegion('centerCercle')}
+            style={styles.bubble}>
+            <Text>Centre du cercle</Text>
           </TouchableOpacity>
         </View>
       </View>
     );
   }
 }
-
-Maps.propTypes = {
-  provider: PROVIDER_GOOGLE,
-};
 
 const styles = StyleSheet.create({
   container: {

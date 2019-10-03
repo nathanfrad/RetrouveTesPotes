@@ -33,6 +33,7 @@ export default class Home extends React.Component {
   }
 
   componentDidMount() {
+    Alert.alert('cc');
     let dbRef = database().ref('events');
     dbRef.on('child_added', val => {
       let evenement = val.val();
@@ -42,6 +43,7 @@ export default class Home extends React.Component {
           events: [...prevState.events, evenement],
         };
       });
+      Alert.alert(evenement);
     });
 
     // connecté ou déconnecté
@@ -86,7 +88,6 @@ export default class Home extends React.Component {
   clearAsyncStorage = async => {
     AsyncStorage.clear();
   };
-
   setAsyncStorage = async => {
     try {
       AsyncStorage.setItem('owners', JSON.stringify(this.state.ownersArray));
@@ -126,11 +127,14 @@ export default class Home extends React.Component {
     const {navigate} = this.props.navigation;
     return (
       <View>
-        {this.state.isConnected ? (
-          <Text style={styles.connected}>Connécté</Text>
-        ) : (
-          <Text style={styles.offline}>Déconnéctée</Text>
-        )}
+        {this.state.events.map(event => {
+          return (
+            <View>
+              <Text>{event.date}</Text>
+            </View>
+          );
+        })}
+
         <SafeAreaView>
           <FlatList
             keyExtractor={item => item.id}
