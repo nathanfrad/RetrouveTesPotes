@@ -54,15 +54,18 @@ class Maps extends React.Component {
       coordinate: new AnimatedRegion({
         latitude: LATITUDE,
         longitude: LONGITUDE,
-        latitudeDelta: 0,
-        longitudeDelta: 0,
-      }),
-      region: {
-        latitude: LATITUDE,
-        longitude: LONGITUDE,
         latitudeDelta: 0.002,
         longitudeDelta: 0.002,
+      }),
+      region: {
+        coordinate: new AnimatedRegion({
+          latitude: LATITUDE,
+          longitude: LONGITUDE,
+          latitudeDelta: 0.002,
+          longitudeDelta: 0.002,
+        }),
       },
+      targetRegion: 'userLocalisation',
       markers: [
         {
           Arthur: {
@@ -124,12 +127,6 @@ class Maps extends React.Component {
   //   }
   // }
 
-  getMapRegion = () => ({
-    latitude: this.state.latitude,
-    longitude: this.state.longitude,
-    latitudeDelta: LATITUDE_DELTA,
-    longitudeDelta: LONGITUDE_DELTA,
-  });
 
   getDistance = (point1, point2, unit) => {
     let lat1 = point1.coordinate.latitude;
@@ -300,17 +297,7 @@ class Maps extends React.Component {
   //   });
   // }
 
-  changeTargetRegion = (target): void => {
-    if (target === 'userLocalisation') {
-      this._currentRegion
-        .timing({...this.state.coordinate, duration: 2000})
-        .start();
-    } else if (target === 'centerCercle') {
-      this._currentRegion
-        .timing({...this.state.averageMarker.coordinate, duration: 2000})
-        .start();
-    }
-  };
+
   // changeTargetRegion = target => {
   //   if (target === 'centerCercle') {
   //     this.setState({
@@ -337,12 +324,34 @@ class Maps extends React.Component {
     this._currentRegion.setValue(region);
   };
 
-  getMapRegion = () => ({
-    latitude: this.state.latitude,
-    longitude: this.state.longitude,
-    latitudeDelta: LATITUDE_DELTA,
-    longitudeDelta: LONGITUDE_DELTA,
-  });
+  // getMapRegion = () => ({
+  //   latitude: this.state.latitude,
+  //   longitude: this.state.longitude,
+  //   latitudeDelta: LATITUDE_DELTA,
+  //   longitudeDelta: LONGITUDE_DELTA,
+  // });
+
+  getMapRegion = () => {
+    if (this.state.targetRegion === 'userLocalisation') {
+      return this.state.coordinate;
+    } else {
+      return this.state.region.coordinate;
+    }
+  };
+
+  changeTargetRegion = (target): void => {
+    if (target === 'userLocalisation') {
+      this.state.coordinate
+        .timing({...this.state.coordinate, duration: 2000})
+        .start();
+    } else if (target === 'centerCercle') {
+      this.state.coordinate
+        .timing({...this.state.region.coordinate, duration: 2000})
+        .start();
+    }
+    this.setState({targetRegion: target});
+  };
+
 
   componentWillReceiveProps(nextProps) {
     const duration = 500;
