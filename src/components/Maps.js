@@ -46,39 +46,39 @@ class Maps extends React.Component {
     });
 
     this.state = {
-      region: new AnimatedRegion({
+      region: {
         latitude: LATITUDE,
         longitude: LONGITUDE,
         latitudeDelta: 0.002,
         longitudeDelta: 0.002,
-      }),
+      },
       markers: [
         {
           title: 'Arthur',
-          coordinate: new AnimatedRegion({
+          coordinate: {
             latitude: 37.76607333,
             longitude: -122.44054,
             latitudeDelta: 0,
             longitudeDelta: 0,
-          }),
+          },
         },
         {
           title: 'Paul',
-          coordinate: new AnimatedRegion({
+          coordinate: {
             latitude: 37.76609333,
             longitude: -122.442304,
             latitudeDelta: 0,
             longitudeDelta: 0,
-          }),
+          },
         },
         {
           title: 'Jean',
-          coordinate: new AnimatedRegion({
+          coordinate: {
             latitude: 37.76606333,
             longitude: -122.44005,
             latitudeDelta: 0,
             longitudeDelta: 0,
-          }),
+          },
         },
       ],
     };
@@ -162,30 +162,26 @@ class Maps extends React.Component {
     let totalLongitude = 0;
     let averageLatitude = 0;
     let averageLongitude = 0;
-    this.state.markers.map(
-      (marker, index) => {
-        totalLatitude = totalLatitude + marker.coordinate.latitude;
-        totalLongitude = totalLongitude + marker.coordinate.longitude;
-        averageLatitude = totalLatitude / (index + 1);
-        averageLongitude = totalLongitude / (index + 1);
+    this.state.markers.map((marker, index) => {
+      totalLatitude = totalLatitude + marker.coordinate.latitude;
+      totalLongitude = totalLongitude + marker.coordinate.longitude;
+      averageLatitude = totalLatitude / (index + 1);
+      averageLongitude = totalLongitude / (index + 1);
+    });
+    this.setState(
+      {
+        averageMarker: {
+          title: 'Average',
+          coordinate: {
+            latitude: averageLatitude,
+            longitude: averageLongitude,
+            latitudeDelta: LATITUDE_DELTA,
+            longitudeDelta: LONGITUDE_DELTA,
+          },
+        },
       },
       () => {
-        this.setState(
-          {
-            averageMarker: {
-              title: 'Average',
-              coordinate: new AnimatedRegion({
-                latitude: averageLatitude,
-                longitude: averageLongitude,
-                latitudeDelta: 0,
-                longitudeDelta: 0,
-              }),
-            },
-          },
-          () => {
-            // this.verifDistance();
-          },
-        );
+        // this.verifDistance();
       },
     );
   };
@@ -222,12 +218,12 @@ class Maps extends React.Component {
           ...this.state.markers,
           {
             title: USER,
-            coordinate: new AnimatedRegion({
+            coordinate: {
               latitude: latitude,
               longitude: longitude,
               latitudeDelta: 0,
               longitudeDelta: 0,
-            }),
+            },
           },
         ],
       });
@@ -253,10 +249,16 @@ class Maps extends React.Component {
     });
   }
 
-  _showApple = (): void => {
-    this._currentRegion
-      .timing({...this.state.currentLocalisation, duration: 2000})
-      .start();
+  changeTargetRegion = (target): void => {
+    if (target === 'userLocalisation') {
+      this._currentRegion
+        .timing({...this.state.currentLocalisation, duration: 2000})
+        .start();
+    } else if (target === 'centerCercle') {
+      this._currentRegion
+        .timing({...this.state.averageMarker.coordinate, duration: 2000})
+        .start();
+    }
   };
   // changeTargetRegion = target => {
   //   if (target === 'centerCercle') {
@@ -282,6 +284,18 @@ class Maps extends React.Component {
 
   _onRegionChangeComplete = (region: Region): void => {
     this._currentRegion.setValue(region);
+  };
+
+
+  test = () => {
+    this.setState({
+      averageMarker: {
+        coordinate: {
+          latitude: 37.76609313,
+          longitude: -122.442404,
+        },
+      },
+    });
   };
 
   render() {
@@ -321,16 +335,16 @@ class Maps extends React.Component {
 
           {this.state.averageMarker && (
             <View>
-              <MapView.Circle
-                center={this.state.averageMarker.coordinate}
-                radius={RadiusCircle}
-                strokeColor={'rgba(1, 66, 96, 1)'}
-                strokeWidth={1}
-                fillColor={'rgba(1, 66, 96, 0.8)'}
-                ref={ref => {
-                  this.circle = ref;
-                }}
-              />
+              {/*<MapView.Circle*/}
+              {/*  center={this.state.averageMarker.coordinate}*/}
+              {/*  radius={RadiusCircle}*/}
+              {/*  strokeColor={'rgba(1, 66, 96, 1)'}*/}
+              {/*  strokeWidth={1}*/}
+              {/*  fillColor={'rgba(1, 66, 96, 0.8)'}*/}
+              {/*  ref={ref => {*/}
+              {/*    this.circle = ref;*/}
+              {/*  }}*/}
+              {/*/>*/}
               <Marker
                 title={this.state.averageMarker.title}
                 key={'8'}
@@ -345,7 +359,7 @@ class Maps extends React.Component {
 
         <View style={styles.buttonContainer}>
           <TouchableOpacity
-            onPress={this._showApple}
+            onPress={() => this.changeTargetRegion('userLocalisation')}
             style={styles.bubble}>
             <Text>Ma localisation</Text>
           </TouchableOpacity>
