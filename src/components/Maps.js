@@ -46,6 +46,17 @@ class Maps extends React.Component {
     });
 
     this.state = {
+      latitude: LATITUDE,
+      longitude: LONGITUDE,
+      routeCoordinates: [],
+      distanceTravelled: 0,
+      prevLatLng: {},
+      coordinate: new AnimatedRegion({
+        latitude: LATITUDE,
+        longitude: LONGITUDE,
+        latitudeDelta: 0,
+        longitudeDelta: 0,
+      }),
       region: {
         latitude: LATITUDE,
         longitude: LONGITUDE,
@@ -54,30 +65,36 @@ class Maps extends React.Component {
       },
       markers: [
         {
-          title: 'Arthur',
-          coordinate: {
-            latitude: 37.76607333,
-            longitude: -122.44054,
-            latitudeDelta: 0,
-            longitudeDelta: 0,
+          Arthur: {
+            title: 'Arthur',
+            coordinate: {
+              latitude: 37.76607333,
+              longitude: -122.44054,
+              latitudeDelta: 0,
+              longitudeDelta: 0,
+            },
           },
         },
         {
-          title: 'Paul',
-          coordinate: {
-            latitude: 37.76609333,
-            longitude: -122.442304,
-            latitudeDelta: 0,
-            longitudeDelta: 0,
+          Paul: {
+            title: 'Paul',
+            coordinate: {
+              latitude: 37.76609333,
+              longitude: -122.442304,
+              latitudeDelta: 0,
+              longitudeDelta: 0,
+            },
           },
         },
         {
-          title: 'Jean',
-          coordinate: {
-            latitude: 37.76606333,
-            longitude: -122.44005,
-            latitudeDelta: 0,
-            longitudeDelta: 0,
+          Jean: {
+            title: 'Jean',
+            coordinate: {
+              latitude: 37.76606333,
+              longitude: -122.44005,
+              latitudeDelta: 0,
+              longitudeDelta: 0,
+            },
           },
         },
       ],
@@ -204,6 +221,7 @@ class Maps extends React.Component {
           timeout: 20000,
           maximumAge: 1000,
           distanceFilter: 10,
+
         },
         {distanceFilter: 10},
       );
@@ -211,48 +229,81 @@ class Maps extends React.Component {
   };
 
   componentDidMount() {
-    this.getCurrentLocalisation().then(result => {
-      const {latitude, longitude} = result;
-      this.setState({
-        markers: [
-          ...this.state.markers,
-          {
-            title: USER,
-            coordinate: {
-              latitude: latitude,
-              longitude: longitude,
-              latitudeDelta: 0,
-              longitudeDelta: 0,
-            },
-          },
-        ],
-      });
+    this.watchID = Geolocation.watchPosition(
+      position => {
+        const {coordinate, routeCoordinates, distanceTravelled} = this.state;
+        const {latitude, longitude} = position.coords;
 
-      this.setState({
-        region: {
-          latitude: latitude,
-          longitude: longitude,
-          latitudeDelta: LATITUDE_DELTA,
-          longitudeDelta: LONGITUDE_DELTA,
-        },
-      });
-
-      this.setState({
-        currentLocalisation: {
-          latitude: latitude,
-          longitude: longitude,
-          latitudeDelta: LATITUDE_DELTA,
-          longitudeDelta: LONGITUDE_DELTA,
-        },
-      });
-      this.centerCircle();
-    });
+        const newCoordinate = {
+          latitude,
+          longitude,
+        };
+        if (Platform.OS === 'android') {
+          if (this.marker) {
+            this.marker._component.animateMarkerToCoordinate(
+              newCoordinate,
+              500,
+            );
+          }
+        } else {
+          coordinate.timing(newCoordinate).start();
+        }
+        this.setState({
+          latitude,
+          longitude,
+          routeCoordinates: routeCoordinates.concat([newCoordinate]),
+          distanceTravelled: distanceTravelled,  //this.calcDistance(newCoordinate),
+          prevLatLng: newCoordinate,
+        });
+      },
+      error => console.log(error),
+      {
+        enableHighAccuracy: true,
+        timeout: 20000,
+        maximumAge: 0,
+        distanceFilter: 1,
+      },
+    );
   }
+
+  // calcDistance = newLatLng => {
+  //   const {prevLatLng} = this.state;
+  //   return haversine(prevLatLng, newLatLng) || 0;
+  // };
+
+
+  // componentDidMount() {
+  //   this.getCurrentLocalisation().then(result => {
+  //     const {latitude, longitude} = result;
+  //     // this.setState({
+  //     //   markers: [...this.state.markers],
+  //     // });
+  //
+  //     this.setState({
+  //       region: {
+  //         latitude: latitude,
+  //         longitude: longitude,
+  //         latitudeDelta: LATITUDE_DELTA,
+  //         longitudeDelta: LONGITUDE_DELTA,
+  //       },
+  //     });
+  //
+  //     this.setState({
+  //       currentLocalisation: new AnimatedRegion({
+  //         latitude: latitude,
+  //         longitude: longitude,
+  //         latitudeDelta: LATITUDE_DELTA,
+  //         longitudeDelta: LONGITUDE_DELTA,
+  //       }),
+  //     });
+  //     this.centerCircle();
+  //   });
+  // }
 
   changeTargetRegion = (target): void => {
     if (target === 'userLocalisation') {
       this._currentRegion
-        .timing({...this.state.currentLocalisation, duration: 2000})
+        .timing({...this.state.coordinate, duration: 2000})
         .start();
     } else if (target === 'centerCercle') {
       this._currentRegion
@@ -286,17 +337,34 @@ class Maps extends React.Component {
     this._currentRegion.setValue(region);
   };
 
+  getMapRegion = () => ({
+    latitude: this.state.latitude,
+    longitude: this.state.longitude,
+    latitudeDelta: LATITUDE_DELTA,
+    longitudeDelta: LONGITUDE_DELTA,
+  });
 
-  test = () => {
-    this.setState({
-      averageMarker: {
-        coordinate: {
-          latitude: 37.76609313,
-          longitude: -122.442404,
-        },
-      },
-    });
-  };
+  componentWillReceiveProps(nextProps) {
+    const duration = 500;
+
+    if (this.props.coordinate !== nextProps.coordinate) {
+      if (Platform.OS === 'android') {
+        if (this.marker) {
+          this.marker._component.animateMarkerToCoordinate(
+            nextProps.coordinate,
+            duration,
+          );
+        }
+      } else {
+        this.state.currentLocalisation
+          .timing({
+            ...nextProps.coordinate,
+            duration,
+          })
+          .start();
+      }
+    }
+  }
 
   render() {
     return (
@@ -304,47 +372,35 @@ class Maps extends React.Component {
         <MapView.Animated
           provider={PROVIDER_GOOGLE}
           style={styles.map}
-          region={this._currentRegion}
+          region={this.getMapRegion()}
+          // region={this._currentRegion}
           onRegionChangeComplete={this._onRegionChangeComplete}
-          // zoomEnabled={true}
-          // scrollEnabled={true}
-        >
+          zoomEnabled={true}
+          scrollEnabled={true}>
           {this.state.markers.map((marker, index) => {
-            if (marker.title === USER) {
-              return (
-                <MapView.Marker.Animated
-                  description={marker.title}
-                  title={marker.title}
-                  pinColor={'green'}
-                  key={index}
-                  coordinate={marker.coordinate}
-                />
-              );
-            } else {
-              return (
-                <MapView.Marker.Animated
-                  description={marker.title}
-                  title={marker.title}
-                  pinColor={'blue'}
-                  key={index}
-                  coordinate={marker.coordinate}
-                />
-              );
-            }
+            return (
+              <MapView.Marker.Animated
+                description={marker.title}
+                title={marker.title}
+                pinColor={'blue'}
+                key={index}
+                coordinate={marker.coordinate}
+              />
+            );
           })}
 
           {this.state.averageMarker && (
             <View>
-              {/*<MapView.Circle*/}
-              {/*  center={this.state.averageMarker.coordinate}*/}
-              {/*  radius={RadiusCircle}*/}
-              {/*  strokeColor={'rgba(1, 66, 96, 1)'}*/}
-              {/*  strokeWidth={1}*/}
-              {/*  fillColor={'rgba(1, 66, 96, 0.8)'}*/}
-              {/*  ref={ref => {*/}
-              {/*    this.circle = ref;*/}
-              {/*  }}*/}
-              {/*/>*/}
+              <MapView.Circle
+                center={this.state.averageMarker.coordinate}
+                radius={RadiusCircle}
+                strokeColor={'rgba(1, 66, 96, 1)'}
+                strokeWidth={1}
+                fillColor={'rgba(1, 66, 96, 0.8)'}
+                ref={ref => {
+                  this.circle = ref;
+                }}
+              />
               <Marker
                 title={this.state.averageMarker.title}
                 key={'8'}
@@ -353,6 +409,15 @@ class Maps extends React.Component {
               />
             </View>
           )}
+          <MapView.Marker.Animated
+            description={'Moi'}
+            title={'Moi'}
+            pinColor={'green'}
+            ref={marker => {
+              this.marker = marker;
+            }}
+            coordinate={this.state.coordinate}
+          />
 
           {/*<Marker coordinate={this.getMapRegion()}/>*/}
         </MapView.Animated>
