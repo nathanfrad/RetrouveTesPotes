@@ -15,6 +15,7 @@ import MapView, {
   Marker,
   PROVIDER_GOOGLE,
   AnimatedRegion,
+  Animated,
 } from 'react-native-maps';
 
 const {width, height} = Dimensions.get('window');
@@ -49,15 +50,6 @@ class Maps extends React.Component {
         longitudeDelta: 0.002,
       }),
       region: {
-        coordinate: new AnimatedRegion({
-          latitude: LATITUDE,
-          longitude: LONGITUDE,
-          latitudeDelta: 0.002,
-          longitudeDelta: 0.002,
-        }),
-      },
-      averageMarker: {
-        title: 'Arthur',
         coordinate: new AnimatedRegion({
           latitude: LATITUDE,
           longitude: LONGITUDE,
@@ -213,6 +205,27 @@ class Maps extends React.Component {
     });
   }
 
+  componentWillReceiveProps(nextProps) {
+    const duration = 500;
+    if (this.props.coordinate !== nextProps.coordinate) {
+      if (Platform.OS === 'android') {
+        if (this.marker) {
+          this.marker._component.animateMarkerToCoordinate(
+            nextProps.coordinate,
+            duration,
+          );
+        }
+      } else {
+        this.state.currentLocalisation
+          .timing({
+            ...nextProps.coordinate,
+            duration,
+          })
+          .start();
+      }
+    }
+  }
+
   // calcDistance = newLatLng => {
   //   const {prevLatLng} = this.state;
   //   return haversine(prevLatLng, newLatLng) || 0;
@@ -249,13 +262,29 @@ class Maps extends React.Component {
 
   getMapRegion = () => {
     if (this.state.targetRegion === 'centerCercle') {
+      // this.state.averageMarker.coordinate
+      //   .timing({...this.state.coordinate, duration: 2000})
+      //   .start();
       return this.state.averageMarker.coordinate;
     } else {
+      // this.state.coordinate
+      //   .timing({...this.state.coordinate, duration: 2000})
+      //   .start();
       return this.state.coordinate;
     }
   };
 
   changeTargetRegion = (target): void => {
+    // if (target === 'userLocalisation') {
+    //   this.state.averageMarker.coordinate
+    //     .timing({...this.state.coordinate, duration: 2000})
+    //     .start();
+    // } else if (target === 'centerCercle') {
+    //   this.state.coordinate
+    //     .timing({...this.state.averageMarker.coordinate, duration: 2000})
+    //     .start();
+    // }
+    //
     if (
       (this.state.averageMarker !== undefined && target === 'centerCercle') ||
       (this.state.coordinate !== undefined && target === 'userLocalisation')
@@ -276,7 +305,7 @@ class Maps extends React.Component {
           scrollEnabled={true}>
           {this.state.markers.map((marker, index) => {
             return (
-              <MapView.Marker.Animated
+              <Marker.Animated
                 description={marker.title}
                 title={marker.title}
                 pinColor={'blue'}
@@ -286,7 +315,7 @@ class Maps extends React.Component {
             );
           })}
 
-          {this.state.averageMarker !== null && (
+          {this.state.averageMarker !== undefined && (
             <View>
               {/*<MapView.Circle*/}
               {/*  center={this.state.averageMarker.coordinate}*/}
