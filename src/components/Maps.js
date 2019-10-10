@@ -38,14 +38,21 @@ export const APPLE = {
 class Maps extends React.Component {
   constructor(props) {
     super(props);
-    this._currentRegion = new MapView.AnimatedRegion({
-      latitude: LATITUDE,
-      longitude: LONGITUDE,
-      latitudeDelta: 0.002,
-      longitudeDelta: 0.002,
-    });
+    // this._currentRegion = new MapView.AnimatedRegion({
+    //   latitude: LATITUDE,
+    //   longitude: LONGITUDE,
+    //   latitudeDelta: 0.002,
+    //   longitudeDelta: 0.002,
+    // });
 
     this.state = {
+      followsUserLocation: true,
+      _currentRegion: new AnimatedRegion({
+        latitude: LATITUDE,
+        longitude: LONGITUDE,
+        latitudeDelta: 0.002,
+        longitudeDelta: 0.002,
+      }),
       latitude: LATITUDE,
       longitude: LONGITUDE,
       routeCoordinates: [],
@@ -127,7 +134,6 @@ class Maps extends React.Component {
   //   }
   // }
 
-
   getDistance = (point1, point2, unit) => {
     let lat1 = point1.coordinate.latitude;
     let lon1 = point1.coordinate.longitude * -1;
@@ -203,6 +209,7 @@ class Maps extends React.Component {
   onRegionChange = region => {
     this.setState({region: region});
   };
+
   getCurrentLocalisation = () => {
     return new Promise(function (resolve, reject) {
       Geolocation.watchPosition(
@@ -218,85 +225,79 @@ class Maps extends React.Component {
           timeout: 20000,
           maximumAge: 1000,
           distanceFilter: 10,
-
         },
         {distanceFilter: 10},
       );
     });
   };
 
-  componentDidMount() {
-    this.watchID = Geolocation.watchPosition(
-      position => {
-        const {coordinate, routeCoordinates, distanceTravelled} = this.state;
-        const {latitude, longitude} = position.coords;
-
-        const newCoordinate = {
-          latitude,
-          longitude,
-        };
-        if (Platform.OS === 'android') {
-          if (this.marker) {
-            this.marker._component.animateMarkerToCoordinate(
-              newCoordinate,
-              500,
-            );
-          }
-        } else {
-          coordinate.timing(newCoordinate).start();
-        }
-        this.setState({
-          latitude,
-          longitude,
-          routeCoordinates: routeCoordinates.concat([newCoordinate]),
-          distanceTravelled: distanceTravelled,  //this.calcDistance(newCoordinate),
-          prevLatLng: newCoordinate,
-        });
-      },
-      error => console.log(error),
-      {
-        enableHighAccuracy: true,
-        timeout: 20000,
-        maximumAge: 0,
-        distanceFilter: 1,
-      },
-    );
-  }
+  // componentDidMount(event) {
+  //   this.watchID = Geolocation.watchPosition(
+  //     position => {
+  //       const {coordinate, routeCoordinates, distanceTravelled} = this.state;
+  //       const {latitude, longitude} = position.coords;
+  //
+  //       const newCoordinate = {
+  //         latitude,
+  //         longitude,
+  //       };
+  //       this.setState({
+  //         latitude,
+  //         longitude,
+  //         routeCoordinates: routeCoordinates.concat([newCoordinate]),
+  //         distanceTravelled: distanceTravelled, //this.calcDistance(newCoordinate),
+  //         prevLatLng: newCoordinate,
+  //       });
+  //
+  //       this.state.region = {
+  //         latitude: latitude,
+  //         longitude: longitude,
+  //         latitudeDelta: LATITUDE_DELTA,
+  //         longitudeDelta: LONGITUDE_DELTA,
+  //       };
+  //       this.animateToRegion();
+  //     },
+  //     error => console.log(error),
+  //     {
+  //       enableHighAccuracy: true,
+  //       timeout: 20000,
+  //       maximumAge: 2000,
+  //       distanceFilter: 5,
+  //     },
+  //   );
+  // }
 
   // calcDistance = newLatLng => {
   //   const {prevLatLng} = this.state;
   //   return haversine(prevLatLng, newLatLng) || 0;
   // };
 
+  componentDidMount() {
+    this.getCurrentLocalisation().then(result => {
+      const {latitude, longitude} = result;
+      // this.setState({
+      //   markers: [...this.state.markers],
+      // });
 
-  // componentDidMount() {
-  //   this.getCurrentLocalisation().then(result => {
-  //     const {latitude, longitude} = result;
-  //     // this.setState({
-  //     //   markers: [...this.state.markers],
-  //     // });
-  //
-  //     this.setState({
-  //       region: {
-  //         latitude: latitude,
-  //         longitude: longitude,
-  //         latitudeDelta: LATITUDE_DELTA,
-  //         longitudeDelta: LONGITUDE_DELTA,
-  //       },
-  //     });
-  //
-  //     this.setState({
-  //       currentLocalisation: new AnimatedRegion({
-  //         latitude: latitude,
-  //         longitude: longitude,
-  //         latitudeDelta: LATITUDE_DELTA,
-  //         longitudeDelta: LONGITUDE_DELTA,
-  //       }),
-  //     });
-  //     this.centerCircle();
-  //   });
-  // }
+      this.state.region = {
+        latitude: latitude,
+        longitude: longitude,
+        latitudeDelta: LATITUDE_DELTA,
+        longitudeDelta: LONGITUDE_DELTA,
+      };
+      // this.animateToRegion();
 
+      // this.setState({
+      //   currentLocalisation: new AnimatedRegion({
+      //     latitude: latitude,
+      //     longitude: longitude,
+      //     latitudeDelta: LATITUDE_DELTA,
+      //     longitudeDelta: LONGITUDE_DELTA,
+      //   }),
+      // });
+      // this.centerCircle();
+    });
+  }
 
   // changeTargetRegion = target => {
   //   if (target === 'centerCercle') {
@@ -321,7 +322,7 @@ class Maps extends React.Component {
   // };
 
   _onRegionChangeComplete = (region: Region): void => {
-    this._currentRegion.setValue(region);
+    this.state._currentRegion.setValue(region);
   };
 
   // getMapRegion = () => ({
@@ -332,48 +333,102 @@ class Maps extends React.Component {
   // });
 
   getMapRegion = () => {
-    if (this.state.targetRegion === 'userLocalisation') {
-      return this.state.coordinate;
-    } else {
-      return this.state.region.coordinate;
-    }
+    return this.state.coordinate;
   };
 
   changeTargetRegion = (target): void => {
-    if (target === 'userLocalisation') {
-      this.state.coordinate
-        .timing({...this.state.coordinate, duration: 2000})
-        .start();
-    } else if (target === 'centerCercle') {
-      this.state.coordinate
-        .timing({...this.state.region.coordinate, duration: 2000})
-        .start();
-    }
-    this.setState({targetRegion: target});
+    // this.state._currentRegion
+    //     //   .timing({...this.state.region.coordinate, duration: 2000})
+    //     //   .start();
+
+    this.state._currentRegion.setValue(this.state.region.coordinate);
+    // if (target === 'userLocalisation') {
+    //   this.state._currentRegion
+    //     .timing({...this.state.coordinate, duration: 2000})
+    //     .start();
+    // } else if (target === 'centerCercle') {
+    //   this.state._currentRegion
+    //     .timing({...this.state.region.coordinate, duration: 2000})
+    //     .start();
+    // }
+    // this.setState({targetRegion: target});
   };
 
+  // componentWillReceiveProps(nextProps) {
+  //   const duration = 500;
+  //
+  //   if (this.props.coordinate !== nextProps.coordinate) {
+  //     if (Platform.OS === 'android') {
+  //       if (this.marker) {
+  //         this.marker._component.animateMarkerToCoordinate(
+  //           nextProps.coordinate,
+  //           duration,
+  //         );
+  //       }
+  //     } else {
+  //       this.state.currentLocalisation
+  //         .timing({
+  //           ...nextProps.coordinate,
+  //           duration,
+  //         })
+  //         .start();
+  //     }
+  //   }
+  // }
 
-  componentWillReceiveProps(nextProps) {
-    const duration = 500;
+  _onPanDrag = e => {
+    this.setState({followsUserLocation: false});
+    // const coord = e.nativeEvent.coordinate;
+    // const newRegion = {
+    //   latitude: coord.latitude,
+    //   longitude: coord.longitude,
+    //   latitudeDelta: LATITUDE_DELTA,
+    //   longitudeDelta: LONGITUDE_DELTA,
+    // };
+    // this.setState({
+    //   region: newRegion,
+    // });
+  };
 
-    if (this.props.coordinate !== nextProps.coordinate) {
-      if (Platform.OS === 'android') {
-        if (this.marker) {
-          this.marker._component.animateMarkerToCoordinate(
-            nextProps.coordinate,
-            duration,
-          );
-        }
-      } else {
-        this.state.currentLocalisation
-          .timing({
-            ...nextProps.coordinate,
-            duration,
-          })
-          .start();
-      }
-    }
+  userLocationChanged(event) {
+    const newRegion = event.nativeEvent.coordinate;
+    this.state.region = {
+      latitude: newRegion.latitude,
+      longitude: newRegion.longitude,
+      latitudeDelta: LATITUDE_DELTA,
+      longitudeDelta: LONGITUDE_DELTA,
+    };
+    this.animateToRegion();
   }
+
+  animateToRegion() {
+    this.map._component.animateToRegion(
+      {
+        latitude: this.state.region.latitude,
+        longitude: this.state.region.longitude,
+        latitudeDelta: this.state.region.latitudeDelta,
+        longitudeDelta: this.state.region.longitudeDelta,
+      },
+      1000,
+    );
+  }
+
+  regionChanged(event) {
+    this.setState({
+      region: {
+        longitudeDelta: event.longitudeDelta,
+        latitudeDelta: event.latitudeDelta,
+        latitude: event.latitude,
+        longitude: event.longitude,
+      },
+    });
+  }
+
+  onDrag = event => {
+    this.setState({
+      followsUserLocation: false,
+    });
+  };
 
   render() {
     return (
@@ -381,11 +436,27 @@ class Maps extends React.Component {
         <MapView.Animated
           provider={PROVIDER_GOOGLE}
           style={styles.map}
-          region={this.getMapRegion()}
-          // region={this._currentRegion}
-          onRegionChangeComplete={this._onRegionChangeComplete}
+          // region={this.getMapRegion()}
+          initialRegion={this.state.region}
+          // region={this.state.region}
+          // onRegionChangeComplete={this._onRegionChangeComplete}
+          onRegionChange={this.regionChanged.bind(this)}
+          showsMyLocationButton
           zoomEnabled={true}
-          scrollEnabled={true}>
+          onUserLocationChange={event => {
+            this.state.followsUserLocation && this.userLocationChanged(event);
+          }}
+          showsUserLocation
+          followsUserLocation={this.state.followsUserLocation}
+          onPanDrag={() => this.onDrag()}
+          loadingEnabled
+          key="mapa"
+          ref={ref => {
+            this.map = ref;
+          }}
+          scrollEnabled={
+            Platform.OS === 'android' ? true : !this.state.followsUserLocation
+          }>
           {this.state.markers.map((marker, index) => {
             return (
               <MapView.Marker.Animated
