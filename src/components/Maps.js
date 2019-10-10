@@ -441,7 +441,7 @@ class Maps extends React.Component {
           // region={this.state.region}
           // onRegionChangeComplete={this._onRegionChangeComplete}
           onRegionChange={this.regionChanged.bind(this)}
-          showsMyLocationButton
+          userLocationAnnotationTitle={'Moi'}
           zoomEnabled={true}
           onUserLocationChange={event => {
             this.state.followsUserLocation && this.userLocationChanged(event);
